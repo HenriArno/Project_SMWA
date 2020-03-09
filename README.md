@@ -19,6 +19,9 @@ Timelines:
 Hashtags:
 #VeniceAirport,
 #PalermoAirport,
+#COVID19,
+#Corona,
+#Virus,
 ...
 
 
