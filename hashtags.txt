@@ -1,6 +1,7 @@
 #VeniceAirport
 #PalermoAirport
 #COVID19
+#COVID-19
 #Corona
 #Virus
 #Lombardia
@@ -8,3 +9,5 @@
 #ItaliaZonaRossa
 #restiamoacasa
 #coronavirusitalia
+#ChinaCoronaVirus
+#outbreak
