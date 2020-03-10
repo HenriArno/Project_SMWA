@@ -27,8 +27,8 @@ removeHTML <- function(text) {
 
 
 # scrape hashtags
-scrape_hashtags <- function (hashtag) {
-  tweets <- search_tweets(hashtag, n = 1000, include_rts = FALSE, token = get_token())
+scrape_hashtags <- function (hashtag, numberOfTweets) {
+  tweets <- search_tweets(hashtag, n = numberOfTweets, include_rts = FALSE, token = get_token())
   tweets <- tibble(tweets$user_id, tweets$text, tweets$created_at, 
                    tweets$screen_name, tweets$location, timeline = F)
   colnames(tweets) <- c('user_id', 'text', 'created_at', 'screen_name', 'location', 'timeline')
@@ -40,8 +40,8 @@ scrape_hashtags <- function (hashtag) {
 
 
 # scrape timelines
-scrape_timelines <- function (timeline) {
-  tweets <- get_timeline(user = timeline, n = 3200, token = get_token())
+scrape_timelines <- function (timeline, numberOfTweets) {
+  tweets <- get_timeline(user = timeline, n = numberOfTweets, token = get_token())
   tweets <- tibble(tweets$user_id, tweets$text, tweets$created_at, 
                    tweets$screen_name, tweets$location, timeline = T)
   colnames(tweets) <- c('user_id', 'text', 'created_at', 'screen_name', 'location', 'timeline')
@@ -56,10 +56,10 @@ hashtags = c('#corona', '#COVID19')
 timelines = c('@MiAirports', '@MilanBergamoBGY')
 
 for (element in hashtags) {
-  scrape_hashtags(element)
+  scrape_hashtags(element, 1600)
 }
 
 for (element in timelines) {
-  scrape_timelines(element)
+  scrape_timelines(element, 1600)
 }
   
