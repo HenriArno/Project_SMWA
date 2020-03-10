@@ -3,6 +3,7 @@
 #COVID19
 #COVID-19
 #Corona
+#Coronavirus
 #Virus
 #Lombardia
 #italylockdown
@@ -11,3 +12,15 @@
 #coronavirusitalia
 #ChinaCoronaVirus
 #outbreak
+#Wuhan
+#beijingcapitalinternationalairport
+#Lukou
+#Bejing
+#Lukouinternationalairport
+#LinateAirport
+#Linate
+#milanairport
+#malpensaairport
+#MarcoPoloAirport
+#venice
+
