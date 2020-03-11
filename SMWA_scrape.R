@@ -41,7 +41,6 @@ scrape_hashtags <- function (hashtag, numberOfTweets) {
 }
 
 
-
 # scrape timelines
 scrape_timelines <- function (timeline, numberOfTweets) {
   tweets <- get_timeline(user = timeline, n = numberOfTweets, token = get_token())
