@@ -13,6 +13,9 @@ Timelines:
 @BLQairport (Bologna Airport),
 @InfoAirport_NAP (Napels Airport CS),
 @PisaAirport (Pisa Airport),
+@TgrLombardia (most famous local news organisation)
+@RegLombardia
+@COVID19Update
 ...
 
 
@@ -22,6 +25,11 @@ Hashtags:
 #COVID19,
 #Corona,
 #Virus,
+#Lombardia (de regio in lockdown in Italie)
+#italylockdown
+#ItaliaZonaRossa
+#restiamoacasa
+#coronavirusitalia
 ...
 
 

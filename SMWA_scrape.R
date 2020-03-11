@@ -2,7 +2,10 @@
 
 # Clean Workspace and setwd
 rm(list=ls())
-setwd("~/Desktop/Project_SMWA")
+
+library(rstudioapi)
+#sets working directory to file directory
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Load Packages
 if (!require("pacman")) install.packages("pacman") ; require("pacman")
@@ -52,8 +55,8 @@ scrape_timelines <- function (timeline, numberOfTweets) {
 
 # Actual Scrapping  --------------------------------------------
 
-hashtags = c('#corona', '#COVID19')
-timelines = c('@MiAirports', '@MilanBergamoBGY')
+hashtags = as.vector(t(read.delim("hashtags.txt", header = F)))
+timelines = as.vector(t(read.delim("timelines.txt", header = F)))
 
 for (element in hashtags) {
   scrape_hashtags(element, 1600)
