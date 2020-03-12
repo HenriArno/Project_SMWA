@@ -31,21 +31,9 @@ removeHTML <- function(text) {
 
 # scrape hashtags
 scrape_hashtags <- function (hashtag, numberOfTweets) {
-  tweets <- search_tweets(hashtag, n = numberOfTweets, include_rts = FALSE, token = get_token())
+  tweets <- search_tweets(hashtag, n = numberOfTweets, include_rts = FALSE, token = get_token(), lang = 'en')
   tweets <- tibble(tweets$user_id, tweets$text, tweets$created_at, 
                    tweets$screen_name, tweets$location, timeline = F)
-  colnames(tweets) <- c('user_id', 'text', 'created_at', 'screen_name', 'location', 'timeline')
-  tweets$text <- tweets$text %>% removeHTML()
-  tweets <- tweets %>% distinct()
-  write_csv(tweets, 'dataset.csv', append = T)
-}
-
-
-# scrape timelines
-scrape_timelines <- function (timeline, numberOfTweets) {
-  tweets <- get_timeline(user = timeline, n = numberOfTweets, token = get_token())
-  tweets <- tibble(tweets$user_id, tweets$text, tweets$created_at, 
-                   tweets$screen_name, tweets$location, timeline = T)
   colnames(tweets) <- c('user_id', 'text', 'created_at', 'screen_name', 'location', 'timeline')
   tweets$text <- tweets$text %>% removeHTML()
   tweets <- tweets %>% distinct()
@@ -64,7 +52,11 @@ hashtags = as.vector(t(read.delim("hashtags.txt", header = F)))
 #Adriaan    [9:10]
 #Seppe      [11:12]
 
+<<<<<<< HEAD
 hashtags = hashtags[3:4]
+=======
+hashtags = hashtags[1:3]
+>>>>>>> 4b7ff1122ab12799e6efee63b3a3b669c7a34193
 
 for (element in hashtags) {
   scrape_hashtags(element, 3200/length(hashtags))
