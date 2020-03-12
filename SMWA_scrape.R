@@ -55,15 +55,20 @@ scrape_timelines <- function (timeline, numberOfTweets) {
 # Actual Scrapping  --------------------------------------------
 
 hashtags = as.vector(t(read.delim("hashtags.txt", header = F)))
-timelines = as.vector(t(read.delim("timelines.txt", header = F)))
 
 #make a subset of hashtags here to scrape
+#Pieter     [1:3]
+#Henri      [4:6]
+#Céline     [7:9]
+#Thibault   [10:12]
+#Adriaan    [13:15]
+#Seppe      [16:18]
+
+hashtags = hashtags[1:X]
 
 for (element in hashtags) {
-  scrape_hashtags(element, 1600/length(hashtags))
+  scrape_hashtags(element, 3200/length(hashtags))
 }
 
-for (element in timelines) {
-  scrape_timelines(element, 1600/length(timelines))
-}
+
 
