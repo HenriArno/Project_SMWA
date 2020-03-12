@@ -1,9 +1,0 @@
-@MiAirports
-@MilanBergamoBGY
-@BLQairport
-@InfoAirport_NAP
-@PisaAirport
-@TgrLombardia
-@RegLombardia
-@COVID19Update
-@comunedivenezia
