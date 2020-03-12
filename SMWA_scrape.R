@@ -45,12 +45,12 @@ scrape_hashtags <- function (hashtag, numberOfTweets) {
 hashtags = as.vector(t(read.delim("hashtags.txt", header = F)))
 
 #make a subset of hashtags here to scrape
-#Pieter     [1:3]
-#Henri      [4:6]
-#Céline     [7:9]
-#Thibault   [10:12]
-#Adriaan    [13:15]
-#Seppe      [16:18]
+#Pieter     [1:2]
+#Henri      [3:4]
+#Céline     [5:6]
+#Thibault   [7:8]
+#Adriaan    [9:10]
+#Seppe      [11:12]
 
 hashtags = hashtags[1:3]
 
