@@ -1,12 +1,8 @@
 # Project_SMWA
 Estimating proportion of cancelled flights based on social media data about COVID-19.
 
-<<<<<<< HEAD
-#Dependent variables
-=======
 # Dependent variables
 
->>>>>>> 4b7ff1122ab12799e6efee63b3a3b669c7a34193
 Proportion of global cancelled flights:
 
 -	Global cancellations (link FlightAware)
