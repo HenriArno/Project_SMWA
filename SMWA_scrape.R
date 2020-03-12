@@ -52,11 +52,8 @@ hashtags = as.vector(t(read.delim("hashtags.txt", header = F)))
 #Adriaan    [9:10]
 #Seppe      [11:12]
 
-<<<<<<< HEAD
+
 hashtags = hashtags[3:4]
-=======
-hashtags = hashtags[1:3]
->>>>>>> 4b7ff1122ab12799e6efee63b3a3b669c7a34193
 
 for (element in hashtags) {
   scrape_hashtags(element, 3200/length(hashtags))
