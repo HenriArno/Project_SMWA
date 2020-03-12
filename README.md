@@ -1,6 +1,9 @@
 # Project_SMWA
 Estimating proportion of cancelled flights based on social media data about COVID-19.
 
+<<<<<<< HEAD
+=======
+
 # Dependent variables
 
 Proportion of global cancelled flights:
@@ -21,12 +24,8 @@ Percentage change compared to last year:
 
 -	Average percentage last year (New York Times Article)
 
-<<<<<<< HEAD
 
-#Independent variables
-=======
 # Independent variables
->>>>>>> 4b7ff1122ab12799e6efee63b3a3b669c7a34193
 
 Scrape hashtags -> see SMWA_scrape.R
 
