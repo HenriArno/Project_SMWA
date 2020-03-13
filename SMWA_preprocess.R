@@ -19,9 +19,7 @@ data <- as_tibble(df)
 
 
 
-text <- as.character(data$text)
-text
-
+text <- data$text
 
 text <- iconv(text, from = "latin1", to = "ascii", sub = "byte")
 
