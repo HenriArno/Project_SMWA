@@ -36,7 +36,7 @@ scrape_hashtags <- function (hashtag, numberOfTweets) {
                    tweets$screen_name, tweets$location, timeline = F)
   colnames(tweets) <- c('user_id', 'text', 'created_at', 'screen_name', 'location', 'timeline')
   tweets$text <- tweets$text %>% removeHTML()
-  tweets <- tweets %>% distinct()
+  tweets <- tweets %>% distinct(., text)
   write_csv(tweets, 'dataset.csv', append = T)
 }
 
@@ -53,7 +53,7 @@ hashtags = as.vector(t(read.delim("hashtags.txt", header = F)))
 #Seppe      [11:12]
 
 
-hashtags = hashtags[7:8]
+hashtags = hashtags[c(3,4,9,10)]
 
 for (element in hashtags) {
   scrape_hashtags(element, 3200/length(hashtags))
