@@ -1,6 +1,4 @@
 # Test script 
-
-
 library(rstudioapi)
 #sets working directory to file directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -15,3 +13,7 @@ df %>% distinct() %>% dim()
 
 tail(df)
 head(df)
+
+correct <- df[1:9361,]
+correct <- as_tibble(correct)
+
