@@ -1,4 +1,6 @@
 # setwd and load packages -------------------------------------------------
+rm(list=ls())
+
 library(rstudioapi)
 #sets working directory to file directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -8,14 +10,24 @@ p_load(httr,rtweet,tidyverse,textclean, textstem, sentimentr, lexicon, maps, dpl
 
 
 # create tibble -----------------------------------------------------------
-df <- read.csv("dataset.csv")
-colnames(df) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 'timeline')
-data <- as_tibble(df)
+data <- read.csv("dataset.csv")
+colnames(data) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 'timeline')
+data <- as_tibble(data)
 
 
 # preprocess data ---------------------------------------------------------
 
+
 ############ WERKT NOG NIET VANF HIER ##############
+
+
+# adjust part of datadrame from row 9.362 untill 23.213 (due to bug in scrape function)
+indices <- c(9362:23213)
+
+data[indices, ]$text <- as.character(data[indices, ]$user_id)
+typeof(data[indices, ]$text)
+
+
 
 
 
