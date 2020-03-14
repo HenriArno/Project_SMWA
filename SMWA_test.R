@@ -11,9 +11,3 @@ df <- read.csv("dataset.csv")
 colnames(df) <- c('id', 'text', 'timestamp', 'user_name', 'loc', 'timeline')
 df %>% distinct() %>% dim()
 
-tail(df)
-head(df)
-
-correct <- df[1:9361,]
-correct <- as_tibble(correct)
-

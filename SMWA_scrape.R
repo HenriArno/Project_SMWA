@@ -36,7 +36,7 @@ scrape_hashtags <- function (hashtag, numberOfTweets) {
                    tweets$screen_name, tweets$location, timeline = F)
   colnames(tweets) <- c('user_id', 'text', 'created_at', 'screen_name', 'location', 'timeline')
   tweets$text <- tweets$text %>% removeHTML()
-  tweets <- tweets %>% distinct(., text)
+  tweets <- tweets %>% distinct()
   write_csv(tweets, 'dataset.csv', append = T)
 }
 
