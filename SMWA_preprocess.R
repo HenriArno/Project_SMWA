@@ -10,30 +10,35 @@ p_load(httr,rtweet,tidyverse,textclean, textstem, sentimentr, lexicon, maps, dpl
 
 
 # create tibble -----------------------------------------------------------
-data <- read.csv("dataset.csv")
+data <- read.csv("dataset.csv", stringsAsFactors = F)
 colnames(data) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 'timeline')
+data$timeline <- NULL
 data <- as_tibble(data)
 
+# impute missing data ---------------------------------------------------------
 
-# preprocess data ---------------------------------------------------------
-
-
-############ WERKT NOG NIET VANF HIER ##############
-
-
-# adjust part of datadrame from row 9.362 untill 23.213 (due to bug in scrape function)
+# adjust part of datadrame from row 9.362 untill 23.213 (due to bug in scrape function) 
 indices <- c(9362:23213)
+data[indices,'text'] <- data[indices, 'user_id']
+data[indices, c('user_id', 'screenname', 'location')] <- NA
+data[indices, c('timestamp')] <- '2020-03-13'
+  
 
-data[indices, ]$text <- as.character(data[indices, ]$user_id)
-typeof(data[indices, ]$text)
 
 
+
+
+
+# Preprocess data ---------------------------------------------------------
+############ WERKT NOG NIET VANF HIER ##############
 
 
 
 text <- data$text
+text 
 
 text <- iconv(text, from = "latin1", to = "ascii", sub = "byte")
+
 
 #Clean the rest of the posts
 cleanText <- function(text) {
