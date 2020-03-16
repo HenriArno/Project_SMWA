@@ -1,6 +1,6 @@
 # setwd and load packages -------------------------------------------------
-rm(list=ls())
 
+rm(list=ls())
 library(rstudioapi)
 #sets working directory to file directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -63,3 +63,4 @@ text_clean <- lemmatize_strings(text_clean, dictionary = lemma_dictionary_hs)
 # store the cleaned text in the dataset and remove redundant tweets
 data$text <- text_clean
 data <- data[!duplicated(data$text),]
+
