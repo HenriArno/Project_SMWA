@@ -1,4 +1,7 @@
 # Test script 
+rm(list=ls())
+
+
 library(rstudioapi)
 #sets working directory to file directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
