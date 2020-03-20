@@ -63,4 +63,4 @@ text_clean <- lemmatize_strings(text_clean, dictionary = lemma_dictionary_hs)
 # store the cleaned text in the dataset and remove redundant tweets
 data$text <- text_clean
 data <- data[!duplicated(data$text),]
-
+write.csv(data, file = "dataset_cleaned.csv")
