@@ -1,19 +1,28 @@
-#sentiment
+
+# Sentiment analysis ------------------------------------------------------
+
+rm(list=ls())
+
+library(rstudioapi)
+#sets working directory to file directory
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+
+
+# loading required packages -----------------------------------------------
 
 if (!require("pacman")) install.packages("pacman") ; require("pacman")
-p_load(SnowballC, slam, tm, RWeka, Matrix)
-#import dataset
-library(readr)
-dataset <- read_csv("~/Project_SMWA/dataset.csv", 
-                    col_names = FALSE)
-View(dataset)
-colnames(dataset) <- c('user_id', 'text', 'created_at', 'screen_name', 'location', 'timeline')
+p_load(SnowballC, slam, tm, RWeka, Matrix, readr, tidyverse)
+
+
+#import dataset and add column names to extract the raw text
+dataset <- read_csv("dataset_cleaned.csv")
+
 text<- dataset %>% select(text)
-created <- dataset%>% select(created_at)
+created <- dataset%>% select(timestamp) 
 
 
 #As you can see text is pretty dirty, so we need to perform preprocessing
-View(text)
 
 
 ###################### Load dictionary #####################
@@ -30,21 +39,19 @@ dictionary_new$VALENCE <- abs(dictionary$VALENCE-10)-dictionary$VALENCE
 #2)rbind the new and the old dictionary
 dictionary_negation <- rbind(dictionary[,c('Word','VALENCE')], 
                              dictionary_new)
-
-dictionary_negation
+rm(dictionary_new, dictionary)
 
 #3)run all unigrams and bigrams through the dictionary
 
-score_negation <- numeric(length(text))
+score_negation <- numeric(dim(text)[1])
 
 
-for (i in 1:length(text)){
-  
-  #transform everything to lower case
-  text <- tolower(text)
+for (i in 1:length(score_negation)){
+  #define entry
+  entry = (text %>% slice(i))[[1]]
   
   #Split up the tweet in words
-  unigrams <- strsplit(text[i],split=" ")[[1]] 
+  unigrams <- strsplit(entry,split=" ")[[1]] 
   
   #Split in bigrams
   bigram <- rbind(unigrams,c(unigrams[2:(length(unigrams))],""))
@@ -74,7 +81,7 @@ for (i in 1:length(text)){
   
 }
 #Let's look at the compare the results
-mean(score_negation) ; mean(scoretweet)
+mean(score_negation) ; mean(scoretweet) #Waar komt die scoretweet precies vandaan?
 sd(score_negation) ; sd(scoretweet)
 hist(score_negation); hist(scoretweet)
 
@@ -84,5 +91,6 @@ cor(scoretweet, score_negation)
 #Now lets make the plots
 #Group in minutes and take the average per minute
 #handle time zone
+# !! WERKT NOG NIET !!
 time <- as.POSIXct(created, format="%Y-%m-%d %H:%M:%S",tz="UTC")
-attributes(time)$tzone <- "CET"
+attributes(created)$tzone <- "CET"
