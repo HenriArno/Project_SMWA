@@ -18,11 +18,9 @@ p_load(SnowballC, slam, tm, RWeka, Matrix, readr, tidyverse)
 #import dataset and add column names to extract the raw text
 dataset <- read_csv("dataset_cleaned.csv")
 
+
 text<- dataset %>% select(text)
-created <- dataset%>% select(timestamp) 
-
-
-#As you can see text is pretty dirty, so we need to perform preprocessing
+created <- dataset%>% select(timestamp)
 
 
 ###################### Load dictionary #####################
@@ -81,16 +79,39 @@ for (i in 1:length(score_negation)){
   
 }
 #Let's look at the compare the results
-mean(score_negation) ; mean(scoretweet) #Waar komt die scoretweet precies vandaan?
-sd(score_negation) ; sd(scoretweet)
-hist(score_negation); hist(scoretweet)
+mean(score_negation) 
+sd(score_negation) 
+hist(score_negation)
 
-#Correlation between both
-cor(scoretweet, score_negation)
 
 #Now lets make the plots
-#Group in minutes and take the average per minute
+#Group in days and take the average per day
 #handle time zone
-# !! WERKT NOG NIET !!
-time <- as.POSIXct(created, format="%Y-%m-%d %H:%M:%S",tz="UTC")
 attributes(created)$tzone <- "CET"
+
+
+#get days for tweets
+#breaksday <- as.integer(cut(created, breaks="day"))
+#breaksday <- created$timestamp$mday
+str(created$timestamp)
+time<-created$timestamp
+#unclass(time)
+#day(time)
+#Compute mean
+negations <- aggregate(score_negation,by=list(paste(breaksday)),mean)$x
+lim <- max(abs(negations))
+
+
+#Plot sentiment by time
+plot(1:length(negations), 
+     rev(negations), 
+     xaxt="n",
+     type="l",
+     ylab="Valence",
+     xlab="Time (day)",
+     main="Sentiment", 
+     ylim=c(-lim,lim))
+
+
+axis(1,at=1:length(sentiment), 
+     labels=rev(unique(substr(time,12,16))))
