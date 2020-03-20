@@ -13,4 +13,3 @@ p_load(httr,rtweet,tidyverse,textclean, textstem, sentimentr, lexicon, maps, dpl
 df <- read.csv("dataset.csv")
 colnames(df) <- c('id', 'text', 'timestamp', 'user_name', 'loc', 'timeline')
 df %>% distinct() %>% dim()
-
