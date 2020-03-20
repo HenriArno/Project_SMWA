@@ -17,7 +17,7 @@ p_load(SnowballC, slam, tm, RWeka, Matrix, readr, tidyverse, lubridate)
 
 #import dataset and add column names to extract the raw text
 dataset <- read_csv("dataset_cleaned.csv")
-dataset <- sample_n(dataset, 100)
+dataset <- sample_n(dataset, 40000)
 
 text<- dataset %>% select(text)
 created <- dataset%>% select(timestamp)
@@ -86,7 +86,8 @@ hist(score_negation)
 ####different approach######
 
 #using lubridate, add a column which has the day of the week as string
-created <- created%>% mutate(day_week = wday(timestamp, label = TRUE))
+breaksday <- created%>% mutate(day(timestamp))
+breaksday[,2]
 #make tibble of the scores to join data together 
 scores <- enframe(score_negation, name=NULL)
 to_plot <- created%>% add_column(scores) %>% select(-timestamp)
@@ -107,7 +108,7 @@ time<-created$timestamp
 #unclass(time)
 #day(time)
 #Compute mean
-negations <- aggregate(score_negation,by=list(paste(breaksday)),mean)$x
+negations <- aggregate(score_negation,by=list(paste(breaksday[,2])),mean)$x
 lim <- max(abs(negations))
 
 
