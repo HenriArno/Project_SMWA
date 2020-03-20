@@ -17,7 +17,7 @@ p_load(SnowballC, slam, tm, RWeka, Matrix, readr, tidyverse, lubridate)
 
 #import dataset and add column names to extract the raw text
 dataset <- read_csv("dataset_cleaned.csv")
-dataset <- sample(dataset, 100)
+dataset <- sample_n(dataset, 100)
 
 text<- dataset %>% select(text)
 created <- dataset%>% select(timestamp)
