@@ -1,6 +1,5 @@
 
 # Sentiment analysis ------------------------------------------------------
-
 rm(list=ls())
 
 library(rstudioapi)
@@ -17,7 +16,7 @@ p_load(SnowballC, slam, tm, RWeka, Matrix, readr, tidyverse, lubridate)
 
 #import dataset and add column names to extract the raw text
 dataset <- read_csv("dataset_cleaned.csv")
-dataset <- sample_n(dataset, 40000)
+#dataset <- sample_n(dataset, 40000)
 
 text<- dataset %>% select(text)
 created <- dataset%>% select(timestamp)
@@ -87,10 +86,13 @@ hist(score_negation)
 
 #using lubridate, add a column which has the day of the week as string
 breaksday <- created%>% mutate(day(timestamp))
-breaksday[,2]
+breaksmonth<-created%>%mutate(month(timestamp))
+days<-deframe(breaksday)
+months<-deframe(breaksmonth)
+
 #make tibble of the scores to join data together 
-scores <- enframe(score_negation, name=NULL)
-to_plot <- created%>% add_column(scores) %>% select(-timestamp)
+#scores <- enframe(score_negation, name=NULL)
+#to_plot <- created%>% add_column(scores) %>% select(-timestamp)
 
 
 
@@ -103,25 +105,29 @@ attributes(created)$tzone <- "CET"
 #get days for tweets
 #breaksday <- as.integer(cut(created, breaks="day"))
 #breaksday <- created$timestamp$mday
-str(created$timestamp)
-time<-created$timestamp
+#str(created$timestamp)
+#time<-created$timestamp
 #unclass(time)
 #day(time)
 #Compute mean
-negations <- aggregate(score_negation,by=list(paste(breaksday[,2])),mean)$x
+negations_sd <- aggregate(score_negation,by=list(paste(months,days)),sd)$x
+negations <- aggregate(score_negation,by=list(paste(months,days)),mean)$x
 lim <- max(abs(negations))
-
+view(negations)
 
 #Plot sentiment by time
 plot(1:length(negations), 
-     rev(negations), 
+     negations, 
      xaxt="n",
-     type="l",
+     type="o",
      ylab="Valence",
-     xlab="Time (day)",
-     main="Sentiment", 
-     ylim=c(-lim,lim))
+     xlab="day",
+     main="Sentiment by day", 
+     #ylim=c(-lim,lim))
+     ylim=c(-2,2))
+#length(unique(days))
 
-
-axis(1,at=1:length(sentiment), 
-     labels=rev(unique(substr(time,12,16))))
+axis(1,at=1:length(negations), 
+     labels=unique(substr(created$timestamp,6,10)))
+lines(negations+negations_sd,col="green")
+lines(negations-negations_sd,col="green")
