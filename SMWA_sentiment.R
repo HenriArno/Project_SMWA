@@ -25,7 +25,7 @@ created <- dataset%>% select(timestamp)
 ###################### Load dictionary #####################
 
 #Reload the dictionary such that everything is between 0 and 9
-dictionary <- read_csv("dictionary.csv")
+dictionary <- read_csv("./sources/raw/dictionary.csv")
 
 #1) Put not in front and new valence scores
 dictionary_new <- dictionary[,c('Word','VALENCE')]
