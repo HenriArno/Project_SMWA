@@ -203,20 +203,19 @@ p_load(SnowballC, slam, tm, RWeka, Matrix)
 data <- read.csv("./sources/cleaned/training set.csv")
 
 #set label
-label <- as.factor(data$score)
+data$score <- as.factor(data$score)
+data <- data %>% select(-X)
+
+#remove NA values
+data <- data %>% drop_na()
 #set seed for reproducablitiy
 set.seed(1000) 
-#divide up data in training and test set
-ind <- sample(x = nrow(data), 
-              size = nrow(data),
-              replace = FALSE)
-train <- data[1:floor(length(ind)*.60),]
-test <- data[(floor(length(ind)*.60)+1):(length(ind)),]
 
 
-# Make our training, test set corpora
-corpus_train <- Corpus(VectorSource(train$text))
-corpus_test <- Corpus(VectorSource(test$text))
+
+
+# Make our training corpus
+corpus <- Corpus(VectorSource(data$text))
 
 # Make a N-grams for train and test
 # We will restrict to onegrams, but it can be adapted to N-grams
@@ -230,34 +229,12 @@ corpus_test <- Corpus(VectorSource(test$text))
 Tokenizer <- function(x) NGramTokenizer(x, 
                                         Weka_control(min = mindegree, 
                                                      max = maxdegree))
-dtm_train <- DocumentTermMatrix(corpus_train, control = list(tokenize = Tokenizer,
+dtm <- DocumentTermMatrix(corpus, control = list(tokenize = Tokenizer,
                                                              weighting = function(x) weightTf(x),
                                                              RemoveNumbers=TRUE,
                                                              removePunctuation=TRUE,
                                                              stripWhitespace= TRUE))
-# Test
-# Training and test set have to be prepared in the same way
-dtm_test <- DocumentTermMatrix(corpus_test, control = list(tokenize = Tokenizer,
-                                                           weighting = function(x) weightTf(x),
-                                                           RemoveNumbers=TRUE,
-                                                           removePunctuation=TRUE,
-                                                           stripWhitespace= TRUE))
 
-
-# Reform the test DTM to have the same terms as the training case 
-# Remember that our test set should contain the same elements as our training dataset
-
-prepareTest <- function (train, test) {
-  Intersect <- test[,intersect(colnames(test), colnames(train))]
-  diffCol <- dtm_train[,setdiff(colnames(train),colnames(test))]
-  newCols <- as.simple_triplet_matrix(matrix(0,nrow=test$nrow,
-                                             ncol=diffCol$ncol))
-  newCols$dimnames <- diffCol$dimnames
-  testNew<-cbind(Intersect,newCols)
-  testNew<- testNew[,colnames(train)]
-}
-
-dtm_test <- prepareTest(dtm_train, dtm_test)
 
 # Convert term document matrices to common sparse matrices to apply efficient SVD algorithm
 # i are the row indices and j the column indices, v the values
@@ -265,8 +242,7 @@ dtm.to.sm <- function(dtm) {
   sparseMatrix(i=dtm$i, j=dtm$j, x=dtm$v,dims=c(dtm$nrow, dtm$ncol))
 }
 
-sm_train <- dtm.to.sm(dtm_train)
-sm_test <- dtm.to.sm(dtm_test)
+sm <- dtm.to.sm(dtm)
 
 # 4. Apply Singular Value Decomposition
 # SVD will help to reduce this to a selected number of terms
@@ -276,37 +252,28 @@ sm_test <- dtm.to.sm(dtm_test)
 p_load(irlba)
 
 # Set k to a high number (20 in our case)
-trainer <- irlba(t(sm_train), nu=20, nv=20)
+trainer <- irlba(t(sm), nu=20, nv=20)
 # str(trainer)
 # We are interested in the V
 # str(trainer$v)
-tester <- as.data.frame(as.matrix(sm_test) %*% trainer$u %*%  solve(diag(trainer$d)))
 
 # 5. Modeling and evaluation: Random forest
 
 p_load(randomForest, AUC, caret)
 
-#apply random forest fit
 
-RF <- randomForest(x = trainer$V, y = label, ntree = 1000)
-preds <- predict(RF, as.data.frame(tester))[,2]
 
-# Calculate AUC
-auc(roc(preds,y_test))
+#apply random forest fit after setting label
+y_train <- as.numeric(sub(",", ".", data$score))
+#Random Forest Fit
+RF <- randomForest(x = as.data.frame(trainer$v), y = y_train, ntree = 1000)
 
-# ROC curve
-plot(roc(preds,y_test))
+#assess performance of fit
+print(RF)
+#pretty low variance explained in this fit
 
-# Normally you should use cross-validation to see whether your results are robust
-# The AUC is pretty good in this case, so you could now extrapolate this model to unseen comments
-
-# Sometimes other performance measures are also reported (accuracy)
-# To so so, let's make predict the labels with random forest
-preds_lab <- predict(RF,tester,type = "response")
-
-p_load("e1071")
-#Now make a confusion matrix
-xtab <- table(preds_lab, y_test)
-confusionMatrix(xtab)
-
+#look at the mean squared error, using the OOB entries as test set
+mean(RF$mse)
+#inspect the pseudo R-squared, formula:(1 - mse / Var(y))
+mean(RF$rsq)
 
