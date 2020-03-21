@@ -35,7 +35,6 @@ data[indices, c('user_id', 'screenname', 'location')] <- NA
 data[indices, c('timestamp')] <- '2020-03-13'
 rm(indices)
 # Extract text from tibble
-data <- data %>% slice(1:2000)
 text <- data %>% select(text)
 
 #transforming data to data we can work with
@@ -114,9 +113,12 @@ rm(emDict, emDict_raw, emojis, emojis_merged, emojis_raw, description, matchto, 
 
 # Construct labeled dataset based on emoji --------------------------------------------------
 
+#firstly we make a regex to select emojis on their UTF-8 representation
 emoji_regex <- paste0(dict$r_encoding, collapse="|")
 
+#initialise list to store scores in
 score <- numeric((dim(text))[1])
+#initialise tibble to store text and fitting valence score
 scores <- tibble() %>% add_column(text =NA) %>% add_column(score=NA)
 
 for (i in 1:length(score)){
@@ -149,4 +151,162 @@ for (i in 1:length(score)){
   
 }
 
-write.csv(scores, "./sources/raw/training set.csv")
+#apply text cleaning in order to make dataset ready for analysis(see preprocess file for full information)
+p_load(httr,rtweet,tidyverse,textclean, textstem, sentimentr, lexicon, maps, dplyr)
+text <- scores$text
+
+cleanText <- function(text) {
+  clean_texts <- text %>%
+    gsub("&amp;", "", .) %>% # remove &
+    gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", .) %>% # remove retweet entities
+    gsub("@\\w+", "", .) %>% # remove at people replace_at() also works
+    gsub("[[:punct:]]", "", .) %>% # remove punctuation
+    gsub("[[:digit:]]", "", .) %>% # remove digits
+    gsub("[ \t]{2,}", " ", .) %>% # remove unnecessary spaces
+    gsub("^\\s+|\\s+$", "", .) %>% # remove unnecessary spaces
+    gsub('#', "", .) %>% #remove only hashtag 
+    #gsub("<.*>", "", .) %>% # remove remainig emojis
+    #gsub("(?:\\s*#\\w+)+\\s*$", "", .) %>% #remove hashtags in total
+    #gsub("http\\w+", "", .) %>% # remove html links replace_html() also works
+    tolower
+  return(clean_texts)
+}
+
+# apply the cleaning functions and save the text in text_clean
+text_clean <- cleanText(text) %>% replace_emoji() %>% replace_emoticon() %>% replace_contraction() %>%
+  replace_internet_slang() %>% replace_kern() %>% replace_word_elongation()
+
+# 3. Perform lemmatization
+lemma_dictionary_hs <- make_lemma_dictionary(text_clean,
+                                             engine = 'hunspell')
+text_clean <- lemmatize_strings(text_clean, dictionary = lemma_dictionary_hs)
+
+# store the cleaned text in the dataset and remove redundant tweets
+scores$text <- text_clean
+scores <- scores[!duplicated(scores$text),]
+
+
+#export text and valence scores to use later on (speed up next part by simply loading in that part)
+write.csv(scores, "./sources/cleaned/training set.csv")
+
+####################################################################################################
+#####FROM HERE ON IN YOU CAN RUN THE CODE AS A STANDALONE FILE IN ORDER TO SPEED UP PROCESS TIME####
+####################################################################################################
+
+
+# constructing training and test set --------------------------------------
+rm(list = ls())
+#load packages
+library(pacman)
+p_load(SnowballC, slam, tm, RWeka, Matrix)
+#read in data
+data <- read.csv("./sources/cleaned/training set.csv")
+
+#set label
+label <- as.factor(data$score)
+#set seed for reproducablitiy
+set.seed(1000) 
+#divide up data in training and test set
+ind <- sample(x = nrow(data), 
+              size = nrow(data),
+              replace = FALSE)
+train <- data[1:floor(length(ind)*.60),]
+test <- data[(floor(length(ind)*.60)+1):(length(ind)),]
+
+
+# Make our training, test set corpora
+corpus_train <- Corpus(VectorSource(train$text))
+corpus_test <- Corpus(VectorSource(test$text))
+
+# Make a N-grams for train and test
+# We will restrict to onegrams, but it can be adapted to N-grams
+
+# Training
+# We use a new function: NgramTokenizer(), which is further wrapped in the custom Tokenizer function
+# Here, you can specify which degree of n-gram you want to include
+# mindegree = 1 and maxdegree = 3 will include onegrams, bigrams and trigrams. 
+# Next, we use this function in the control argument of the DocumentTermMatrix
+
+Tokenizer <- function(x) NGramTokenizer(x, 
+                                        Weka_control(min = mindegree, 
+                                                     max = maxdegree))
+dtm_train <- DocumentTermMatrix(corpus_train, control = list(tokenize = Tokenizer,
+                                                             weighting = function(x) weightTf(x),
+                                                             RemoveNumbers=TRUE,
+                                                             removePunctuation=TRUE,
+                                                             stripWhitespace= TRUE))
+# Test
+# Training and test set have to be prepared in the same way
+dtm_test <- DocumentTermMatrix(corpus_test, control = list(tokenize = Tokenizer,
+                                                           weighting = function(x) weightTf(x),
+                                                           RemoveNumbers=TRUE,
+                                                           removePunctuation=TRUE,
+                                                           stripWhitespace= TRUE))
+
+
+# Reform the test DTM to have the same terms as the training case 
+# Remember that our test set should contain the same elements as our training dataset
+
+prepareTest <- function (train, test) {
+  Intersect <- test[,intersect(colnames(test), colnames(train))]
+  diffCol <- dtm_train[,setdiff(colnames(train),colnames(test))]
+  newCols <- as.simple_triplet_matrix(matrix(0,nrow=test$nrow,
+                                             ncol=diffCol$ncol))
+  newCols$dimnames <- diffCol$dimnames
+  testNew<-cbind(Intersect,newCols)
+  testNew<- testNew[,colnames(train)]
+}
+
+dtm_test <- prepareTest(dtm_train, dtm_test)
+
+# Convert term document matrices to common sparse matrices to apply efficient SVD algorithm
+# i are the row indices and j the column indices, v the values
+dtm.to.sm <- function(dtm) {
+  sparseMatrix(i=dtm$i, j=dtm$j, x=dtm$v,dims=c(dtm$nrow, dtm$ncol))
+}
+
+sm_train <- dtm.to.sm(dtm_train)
+sm_test <- dtm.to.sm(dtm_test)
+
+# 4. Apply Singular Value Decomposition
+# SVD will help to reduce this to a selected number of terms
+# Note that we implemented an approximation with the package irlba, 
+# since the 'normal' svd gets stuck with very large datasets
+
+p_load(irlba)
+
+# Set k to a high number (20 in our case)
+trainer <- irlba(t(sm_train), nu=20, nv=20)
+# str(trainer)
+# We are interested in the V
+# str(trainer$v)
+tester <- as.data.frame(as.matrix(sm_test) %*% trainer$u %*%  solve(diag(trainer$d)))
+
+# 5. Modeling and evaluation: Random forest
+
+p_load(randomForest, AUC, caret)
+
+#apply random forest fit
+
+RF <- randomForest(x = trainer$V, y = label, ntree = 1000)
+preds <- predict(RF, as.data.frame(tester))[,2]
+
+# Calculate AUC
+auc(roc(preds,y_test))
+
+# ROC curve
+plot(roc(preds,y_test))
+
+# Normally you should use cross-validation to see whether your results are robust
+# The AUC is pretty good in this case, so you could now extrapolate this model to unseen comments
+
+# Sometimes other performance measures are also reported (accuracy)
+# To so so, let's make predict the labels with random forest
+preds_lab <- predict(RF,tester,type = "response")
+
+p_load("e1071")
+#Now make a confusion matrix
+xtab <- table(preds_lab, y_test)
+confusionMatrix(xtab)
+
+
