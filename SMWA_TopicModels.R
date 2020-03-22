@@ -57,6 +57,7 @@ for (i in 2:20) {
 
 #Make final LDA
 topicmodel <- LDA(x = dtm, k = K + 2, control = list(seed = 1234))
+topicmodel <- LDA(x = dtm, k = 4, control = list(seed = 1234))
 
 ###### Topics and terms
 (topic_term <- tidy(topicmodel, matrix = 'beta'))
@@ -111,16 +112,11 @@ user_topic_tweet <- user_topic %>%
 user_topic_tweet <- fastDummies::dummy_cols(user_topic_tweet, select_columns = "topic")
 
 # Create predictors as percentages
-doc_topic <- fastDummies::dummy_cols(doc_topic, select_columns = "topic")
+doc_topic <- doc_topic %>% spread(., key = 'topic', value = 'gamma')
 
-# Very slow code, needs to be rewritten so it works faster
-for (i in 1:nrow(doc_topic)) {
-  doc_topic[i,"topic_1"] = doc_topic[i,"topic_1"]*doc_topic[i,"gamma"]
-  doc_topic[i,"topic_2"] = doc_topic[i,"topic_2"]*doc_topic[i,"gamma"]
-  doc_topic[i,"topic_3"] = doc_topic[i,"topic_3"]*doc_topic[i,"gamma"]
-  doc_topic[i,"topic_4"] = doc_topic[i,"topic_4"]*doc_topic[i,"gamma"]
-}
-
-
-
+# Creating final table
+final_table <- inner_join(user_topic_tweet, doc_topic, by = 'document', copy = FALSE)
+colnames(final_table) <- c('document', 'best_topic', 'best_topic_gamma', 'text', 'topic_1_dummy'
+                           , 'topic_2_dummy', 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 
+                           'topic_2_gamma', 'topic_3_gamma', 'topic_4_gamma')
 
