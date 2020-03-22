@@ -194,7 +194,7 @@ write.csv(scores, "./sources/cleaned/training set.csv")
 ####################################################################################################
 
 
-# constructing training and test set --------------------------------------
+# constructing training set --------------------------------------
 rm(list = ls())
 #load packages
 library(pacman)
@@ -276,4 +276,33 @@ print(RF)
 mean(RF$mse)
 #inspect the pseudo R-squared, formula:(1 - mse / Var(y))
 mean(RF$rsq)
+
+
+
+# Random forest with categorical labels -----------------------------------
+#In the next part we will recode the scores into a positive, negative or neutral variable and see the impact
+#this has on our Random Forest model
+
+
+# recoding label ----------------------------------------------------------
+
+#store label as a vector
+label <-as.numeric(sub(",", ".", data$score))
+
+#recode label to category in data
+data <- data %>% mutate(cat = cut(label, breaks =c(-Inf,0,0.0000001, Inf), right = F, labels = c("negative", "neutral", "positive")))%>% select(-score) 
+
+#apply RF
+RF <- randomForest(x=as.data.frame(trainer$v),y= as.factor(data$cat),
+                   importance=TRUE,ntree=1000)
+preds <- RF$predicted
+error <- RF$err.rate
+confusionmatrix <- RF$confusion
+# Calculate AUC
+
+#We can see that although the model will be quite efficient at detecting positive statements, negative statements
+#might pose an issue due to the lower frequency of negative emojis present in our dataset
+
+
+
 
