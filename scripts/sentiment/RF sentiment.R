@@ -24,7 +24,7 @@ p_load(tidyverse,Unicode,tm, rvest, rtweet, stringr)
 
 #reading in dataset as tibble
 data <- read.csv("./sources/raw/dataset.csv", stringsAsFactors = F)
-
+colnames(data) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 'timeline')
 
 # constructing emoji dictionary -------------------------------------------
 
@@ -102,7 +102,8 @@ rm(emDict, emDict_raw, emojis, emojis_merged, emojis_raw, description, matchto, 
 emoji_regex <- paste0(dict$r_encoding, collapse="|")
 
 #initialise list to store scores in
-score <- numeric((dim(text))[1])
+
+score <- numeric((dim(text)[1]))
 #initialise tibble to store text and fitting valence score
 scores <- tibble() %>% add_column(text =NA) %>% add_column(score=NA)
 

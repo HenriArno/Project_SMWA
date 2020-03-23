@@ -45,7 +45,7 @@ cleanText <- function(text) {
     gsub("[ \t]{2,}", " ", .) %>% # remove unnecessary spaces
     gsub("^\\s+|\\s+$", "", .) %>% # remove unnecessary spaces
     gsub('#', "", .) %>% #remove only hashtag 
-    gsub("<.*>", "", .) %>% # remove remainig emojis
+    #gsub("<.*>", "", .) %>% # remove remainig emojis
     #gsub("(?:\\s*#\\w+)+\\s*$", "", .) %>% #remove hashtags in total
     #gsub("http\\w+", "", .) %>% # remove html links replace_html() also works
     tolower
@@ -53,7 +53,7 @@ cleanText <- function(text) {
 }
 
 # applt the cleaning functions and save the text in text_clean
-text_clean <- cleanText(text) %>% replace_emoji() %>% replace_emoticon() %>% replace_contraction() %>%
+text_clean <- cleanText(text) %>% replace_contraction() %>%
   replace_internet_slang() %>% replace_kern() %>% replace_word_elongation()
 
 # 3. Perform lemmatization

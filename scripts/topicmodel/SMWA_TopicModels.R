@@ -120,3 +120,4 @@ colnames(final_table) <- c('document', 'best_topic', 'best_topic_gamma', 'text',
                            , 'topic_2_dummy', 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 
                            'topic_2_gamma', 'topic_3_gamma', 'topic_4_gamma')
 
+write_csv(final_table, './sources/predictors/topic_models.csv')
