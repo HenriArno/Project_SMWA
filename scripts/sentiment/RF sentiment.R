@@ -23,9 +23,8 @@ p_load(tidyverse,Unicode,tm, rvest, rtweet, stringr)
 # Reading in data ---------------------------------------------
 
 #reading in dataset as tibble
-data <- read.csv("./sources/raw/dataset.csv", stringsAsFactors = F)
-colnames(data) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 'timeline')
-
+data <- read.csv("./sources/cleaned/dataset_cleaned.csv")
+text <- enframe(data$text)
 # constructing emoji dictionary -------------------------------------------
 
 #I used the code linked to this article: https://www.r-bloggers.com/emojis-analysis-in-r/
