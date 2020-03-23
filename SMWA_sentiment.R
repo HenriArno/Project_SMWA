@@ -2,7 +2,6 @@
 # Sentiment analysis ------------------------------------------------------
 rm(list=ls())
 
-library(rstudioapi)
 #sets working directory to file directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
@@ -15,7 +14,7 @@ p_load(SnowballC, slam, tm, RWeka, Matrix, readr, tidyverse, lubridate)
 
 
 #import dataset and add column names to extract the raw text
-dataset <- read_csv("dataset_cleaned.csv")
+dataset <- read_csv("dataset.csv")
 #dataset <- sample_n(dataset, 40000)
 
 text<- dataset %>% select(text)
