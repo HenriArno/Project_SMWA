@@ -24,7 +24,8 @@ p_load(tidyverse,Unicode,tm, rvest, rtweet, stringr)
 
 #reading in dataset as tibble
 data <- read.csv("./sources/cleaned/dataset_cleaned.csv")
-text <- enframe(data$text)
+text <- iconv(data$text, from = "latin1", to = "ascii", sub = "byte")
+text <- enframe(text)
 # constructing emoji dictionary -------------------------------------------
 
 #I used the code linked to this article: https://www.r-bloggers.com/emojis-analysis-in-r/
