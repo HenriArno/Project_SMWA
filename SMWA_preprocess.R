@@ -44,7 +44,7 @@ cleanText <- function(text) {
     gsub("[ \t]{2,}", " ", .) %>% # remove unnecessary spaces
     gsub("^\\s+|\\s+$", "", .) %>% # remove unnecessary spaces
     gsub('#', "", .) %>% #remove only hashtag 
-    #gsub("<.*>", "", .) %>% # remove remainig emojis
+    gsub("<.*>", "", .) %>% # remove remainig emojis
     #gsub("(?:\\s*#\\w+)+\\s*$", "", .) %>% #remove hashtags in total
     #gsub("http\\w+", "", .) %>% # remove html links replace_html() also works
     tolower
@@ -63,4 +63,7 @@ text_clean <- lemmatize_strings(text_clean, dictionary = lemma_dictionary_hs)
 # store the cleaned text in the dataset and remove redundant tweets
 data$text <- text_clean
 data <- data[!duplicated(data$text),]
+
+#Save clean data
+write_csv(data, 'dataset_cleaned.csv')
 
