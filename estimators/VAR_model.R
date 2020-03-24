@@ -7,10 +7,10 @@
 # Clean Workspace and setwd
 rm(list=ls())
 
+library(rstudioapi)
 #sets working directory to file directory
-#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-#setwd("../..")
-setwd("~/R/SMWA/Assignment 2") ######################### !!!!!!!!!!!!!!!!!!!!!!!!! 
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd("..")
 
 # Load Packages
 if (!require("pacman")) install.packages("pacman") ; require("pacman")
