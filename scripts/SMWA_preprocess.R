@@ -16,6 +16,13 @@ colnames(data) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 't
 data$timeline <- NULL
 data <- as_tibble(data)
 
+
+# Debug Mode --------------------------------------------------------------
+
+# Place following line in comment if you want to perform data manipulations on entire dateset 
+# otherwise we only look at the first 200 entries 
+data <- data %>% slice(., 1:200)
+
 # impute missing data ---------------------------------------------------------
 
 # adjust part of datadrame from row 9.362 untill 23.213 (due to bug in scrape function) 

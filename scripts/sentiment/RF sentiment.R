@@ -23,9 +23,26 @@ p_load(tidyverse,Unicode,tm, rvest, rtweet, stringr)
 # Reading in data ---------------------------------------------
 
 #reading in dataset as tibble
-data <- read.csv("./sources/cleaned/dataset_cleaned.csv")
-text <- iconv(data$text, from = "latin1", to = "ascii", sub = "byte")
-text <- enframe(text)
+data <- read.csv("./sources/raw/dataset.csv", stringsAsFactors = F)
+colnames(data) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 'timeline')
+data$timeline <- NULL
+data <- as_tibble(data)
+#data <- data%>% slice(1:200)
+
+# adjust part of datadrame from row 9.362 untill 23.213 (due to bug in scrape function) 
+indices <- c(9362:23213)
+data[indices,'text'] <- data[indices, 'user_id']
+data[indices, c('user_id', 'screenname', 'location')] <- NA
+data[indices, c('timestamp')] <- '2020-03-13'
+rm(indices)
+# Extract text from tibble
+text <- data %>% select(text)
+
+#transforming data to data we can work with
+text <- text %>% mutate(text = iconv(text, from = "latin1", to = "ascii", sub = "byte"))
+
+
+
 # constructing emoji dictionary -------------------------------------------
 
 #I used the code linked to this article: https://www.r-bloggers.com/emojis-analysis-in-r/
@@ -134,7 +151,6 @@ for (i in 1:length(score)){
     score[i] <- score[i]
     scores <- scores %>% add_row(text = entry, score = score[i])
     }
-  
 }
 
 scores <- scores[!duplicated(scores$text),]
@@ -155,6 +171,7 @@ library(pacman)
 p_load(SnowballC, slam, tm, RWeka, Matrix)
 #read in data
 data <- read.csv("./sources/cleaned/training set.csv")
+newdata <- read.csv("./sources/cleaned/dataset_cleaned.csv")
 
 #set label
 data$score <- as.factor(data$score)
@@ -162,6 +179,9 @@ data <- data %>% select(-X)
 
 #remove NA values
 data <- data %>% drop_na()
+
+#select newdata text to predict on
+
 #set seed for reproducablitiy
 set.seed(1000) 
 
@@ -170,6 +190,7 @@ set.seed(1000)
 
 # Make our training corpus
 corpus <- Corpus(VectorSource(data$text))
+corpus_pred <- Corpus(VectorSource(newdata$text))
 
 # Make a N-grams for train and test
 # We will restrict to onegrams, but it can be adapted to N-grams
@@ -188,7 +209,27 @@ dtm <- DocumentTermMatrix(corpus, control = list(tokenize = Tokenizer,
                                                              RemoveNumbers=TRUE,
                                                              removePunctuation=TRUE,
                                                              stripWhitespace= TRUE))
+#construct prediction set
+dtm_pred <- DocumentTermMatrix(corpus_pred, control = list(tokenize = Tokenizer,
+                                                           weighting = function(x) weightTf(x),
+                                                           RemoveNumbers=TRUE,
+                                                           removePunctuation=TRUE,
+                                                           stripWhitespace= TRUE))
 
+# Reform the pred DTM to have the same terms as the training case 
+# Remember that our test set should contain the same elements as our training dataset
+
+prepareTest <- function (train, test) {
+  Intersect <- test[,intersect(colnames(test), colnames(train))]
+  diffCol <- dtm[,setdiff(colnames(train),colnames(test))]
+  newCols <- as.simple_triplet_matrix(matrix(0,nrow=test$nrow,
+                                             ncol=diffCol$ncol))
+  newCols$dimnames <- diffCol$dimnames
+  testNew<-cbind(Intersect,newCols)
+  testNew<- testNew[,colnames(train)]
+}
+
+dtm_pred <- prepareTest(dtm, dtm_pred)
 
 # Convert term document matrices to common sparse matrices to apply efficient SVD algorithm
 # i are the row indices and j the column indices, v the values
@@ -197,7 +238,7 @@ dtm.to.sm <- function(dtm) {
 }
 
 sm <- dtm.to.sm(dtm)
-
+sm_pred <- dtm.to.sm(dtm_pred)
 # 4. Apply Singular Value Decomposition
 # SVD will help to reduce this to a selected number of terms
 # Note that we implemented an approximation with the package irlba, 
@@ -210,6 +251,7 @@ trainer <- irlba(t(sm), nu=20, nv=20)
 # str(trainer)
 # We are interested in the V
 # str(trainer$v)
+predicotr <- as.data.frame(as.matrix(sm_pred) %*% trainer$u %*%  solve(diag(trainer$d)))
 
 # 5. Modeling and evaluation: Random forest
 
@@ -231,7 +273,9 @@ mean(RF$mse)
 #inspect the pseudo R-squared, formula:(1 - mse / Var(y))
 mean(RF$rsq)
 
-
+#predict on dataset_cleaned
+prediciton1 <- predict(RF, predictor)
+write.csv("./sources/predictors/RFregression.csv")
 
 # Random forest with categorical labels -----------------------------------
 #In the next part we will recode the scores into a positive, negative or neutral variable and see the impact
@@ -259,4 +303,5 @@ confusionmatrix <- RF$confusion
 
 
 
-
+prediction2 <- predict(RF, predictor, type="probs")
+write.csv("./sources/predictors/RFclass.csv")
