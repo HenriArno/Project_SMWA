@@ -32,6 +32,38 @@ dataset=dataset %>%
 text<- dataset %>% select(text)
 created <- dataset%>% select(timestamp)
 
+#clean the text
+cleanText <- function(text) {
+  clean_texts <- text %>%
+    gsub("&amp;", "", .) %>% # remove &
+    gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", .) %>% # remove retweet entities
+    gsub("[ \t]{2,}", " ", .) %>% # remove unnecessary spaces
+    gsub("^\\s+|\\s+$", "", .) %>% # remove unnecessary spaces
+    tolower
+  return(clean_texts)
+}
+
+text_clean <- cleanText(text)
+
+text_clean <- text_clean %>% 
+  replace_url() %>% #will delete the url
+  replace_tag() %>% #replaces @...
+  replace_hash(x, replacement = '$3') %>% #will replace the hastag like this: #rstats -> rstats 
+  replace_contraction() %>%
+  replace_internet_slang() %>% 
+  replace_kern() %>% 
+  replace_word_elongation() %>%
+  replace_white() %>% trimws() #function to delete white spaces
+
+lemma_dictionary_hs <- make_lemma_dictionary(text_clean,
+                                             engine = 'hunspell')
+text_final <- lemmatize_strings(text_clean, dictionary = lemma_dictionary_hs)
+
+#detect emojis and emoticons
+text_final <- text_final %>% 
+  replace_emoji() %>%
+  replace_emoticon()
+
 
 ###################### Load dictionary #####################
 
@@ -51,12 +83,12 @@ rm(dictionary_new, dictionary)
 
 #3)run all unigrams and bigrams through the dictionary
 
-score_negation <- numeric(dim(text)[1])
+score_negation <- numeric(dim(text_final)[1])
 
 
 for (i in 1:length(score_negation)){
   #define entry
-  entry = (text %>% slice(i))[[1]]
+  entry = (text_final %>% slice(i))[[1]]
   
   #Split up the tweet in words
   unigrams <- strsplit(entry,split=" ")[[1]] 
