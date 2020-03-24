@@ -21,7 +21,7 @@ p_load(httr,rtweet,tidyverse,textclean, textstem, sentimentr, lexicon)
 # loading data ------------------------------------------------------------
 data = read.csv("./sources/cleaned/dataset_cleaned.csv")
 #slice data to make code run faster for debug (TEMPORARY)
-data <- data%>% slice(1:200)
+#data <- data%>% slice(1:200)
 #Select text to perform analysis on
 text <- as.vector(data$text)
 
@@ -36,6 +36,7 @@ data$X<-sentiment$element_id
 #join everything in tibble to get a clear result
 result <- sentiment%>%select(-c(element_id, sd))%>% merge(data, by = 'X') %>% select(-X)
 
+write_csv(result, './sources/predictors/sentiment_sentimentr_1.csv')
 
 
 # Sentiment with punctuation ----------------------------------------------
@@ -48,9 +49,10 @@ valence_shifters_updated <-update_valence_shifter_table(key = hash_valence_shift
                                                         x = update)
 
 #replace punctuation in text with their respective textual counterpart
+text <- as.vector(data$text)
 text <- text %>% 
-  gsub('!', 'exclamation') %>%
-  gsub('?', 'question mark')
+  gsub('!', 'exclamation', .) %>%
+  gsub('?', 'question mark', .)
 
 #perform analysis
 sentiment2 <- text %>% get_sentences()%>%sentiment_by(valence_shifters_dt = valence_shifters_updated)
@@ -58,4 +60,9 @@ sentiment2 <- text %>% get_sentences()%>%sentiment_by(valence_shifters_dt = vale
 sentiment2$X <-  sentiment2$element_id
 #join everything in tibble to get a clear result
 result2 <- sentiment2%>%select(-c(element_id, sd))%>% merge(data, by = 'X') %>% select(-X)
+
+
+
+# Write csv file ----------------------------------------------------------
+write_csv(result2, './sources/predictors/sentiment_sentimentr_2.csv')
 

@@ -7,14 +7,8 @@ p_load(SnowballC, slam, tm, RWeka, Matrix, readr, tidyverse, lubridate)
 
 #import dataset
 library(readr)
-<<<<<<< HEAD
 dataset <- read_csv("./sources/cleaned/dataset_cleaned.csv", col_names = TRUE)
-=======
-
-dataset <- read_csv("./sources/cleaned/dataset_cleaned.csv", col_names = TRUE)
-
->>>>>>> 10f20e24eb3b16dfcb768ebf36f77a5fe815b2d3
-#View(dataset)
+#dataset <- dataset %>% slice(., 1:200)
 
 #order dataset by timestamp column
 dataset<-dataset[order(dataset$timestamp),]  
@@ -126,8 +120,8 @@ lines(negations-negations_sd,col="green")
 
 
 # Write table -------------------------------------------------------------
-
-
-
-text$sentiment <- score_negation
+final_table <- dataset
+final_table$sentiment <- score_negation
 avg_day <- as.data.frame(negations)
+write_csv(final_table, './sources/predictors/sentiment_dict.csv')
+write_csv(avg_day, './sources/predictors/sentiment_dict_day.csv')
