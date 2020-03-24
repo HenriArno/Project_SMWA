@@ -19,7 +19,7 @@ p_load(httr,rtweet,tidyverse,textclean, textstem, sentimentr, lexicon)
 
 
 # loading data ------------------------------------------------------------
-data = read.csv("./sources/raw/dataset_cleaned.csv")
+data = read.csv("./sources/cleaned/dataset_cleaned.csv")
 #slice data to make code run faster for debug (TEMPORARY)
 data <- data%>% slice(1:200)
 #Select text to perform analysis on
