@@ -149,9 +149,8 @@ for (i in 1:length(score)){
   if (is.na(score[i])) score[i] <- 0 
   else {
     score[i] <- score[i]
-#    scores <- scores %>% add_row(text = entry, score = score[i])
+    scores <- scores %>% add_row(text = entry, score = score[i])
     }
-  scores <- scores %>% add_row(text = entry, score = score[i])
 }
 
 scores <- scores[!duplicated(scores$text),]
