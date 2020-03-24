@@ -23,9 +23,21 @@ p_load(tidyverse,Unicode,tm, rvest, rtweet, stringr)
 # Reading in data ---------------------------------------------
 
 #reading in dataset as tibble
-data <- read.csv("./sources/cleaned/dataset_cleaned.csv")
+#data <- read.csv("./sources/cleaned/dataset_cleaned.csv")
+data <- read_csv("./sources/raw/dataset.csv", col_names = F)
+colnames(data) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 'timeline')
+
+# Debug Mode --------------------------------------------------------------
+
+# Place following line in comment if you want to perform data manipulations on entire dateset 
+# otherwise we only look at the first 200 entries 
+#data <- data %>% slice(., 1:200)
+
+# Reading in data ---------------------------------------------
 text <- iconv(data$text, from = "latin1", to = "ascii", sub = "byte")
 text <- enframe(text)
+
+
 # constructing emoji dictionary -------------------------------------------
 
 #I used the code linked to this article: https://www.r-bloggers.com/emojis-analysis-in-r/
@@ -132,9 +144,9 @@ for (i in 1:length(score)){
   if (is.na(score[i])) score[i] <- 0 
   else {
     score[i] <- score[i]
-    scores <- scores %>% add_row(text = entry, score = score[i])
+#    scores <- scores %>% add_row(text = entry, score = score[i])
     }
-  
+  scores <- scores %>% add_row(text = entry, score = score[i])
 }
 
 scores <- scores[!duplicated(scores$text),]

@@ -14,6 +14,15 @@ p_load(rtweet, httr,tidyverse,wordcloud, tm, topicmodels, tidytext, textclean, f
 
 data_clean <- read_csv('./sources/cleaned/dataset_cleaned.csv')
 
+
+
+# Debug Mode --------------------------------------------------------------
+
+# Place following line in comment if you want to perform data manipulations on entire dateset 
+# otherwise we only look at the first 200 entries 
+data_clean <- data_clean %>% slice(., 1:200)
+
+
 # Topic Modeling ----------------------------------------------------------
 
 #First create a tibble 

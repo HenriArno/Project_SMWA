@@ -16,7 +16,7 @@ p_load(SnowballC, slam, tm, RWeka, Matrix, readr, tidyverse, lubridate)
 #import dataset and add column names to extract the raw text
 #dataset <- read_csv("dataset_cleaned.csv")
 library(readr)
-dataset <- read_csv("dataset.csv", col_names = FALSE)
+dataset <- read_csv("./sources/raw/dataset.csv", col_names = FALSE)
 #View(dataset)
 dataset=dataset %>% 
   rename(
