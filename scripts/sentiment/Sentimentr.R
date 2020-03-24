@@ -32,6 +32,7 @@ text <- as.vector(data$text)
 sentiment <- text %>% get_sentences()%>%sentiment_by()
 #make matching index columns
 sentiment$X <-  sentiment$element_id
+data$X<-sentiment$element_id
 #join everything in tibble to get a clear result
 result <- sentiment%>%select(-c(element_id, sd))%>% merge(data, by = 'X') %>% select(-X)
 
