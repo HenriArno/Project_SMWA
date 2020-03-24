@@ -1,21 +1,15 @@
 # Sentiment analysis ------------------------------------------------------
 rm(list=ls())
 
-#sets working directory to file directory
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-
-
 # loading required packages -----------------------------------------------
 if (!require("pacman")) install.packages("pacman") ; require("pacman")
 p_load(SnowballC, slam, tm, RWeka, Matrix, readr, tidyverse, lubridate)
 
 #import dataset
 library(readr)
-<<<<<<< HEAD
-dataset <- read_csv("./sources/raw/dataset.csv", col_names = FALSE)
-=======
+
 dataset <- read_csv("./sources/cleaned/dataset_cleaned.csv", col_names = TRUE)
->>>>>>> c66112d2792f14ffe684fbce4018fc192e2d5109
+
 #View(dataset)
 
 #order dataset by timestamp column
