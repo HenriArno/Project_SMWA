@@ -27,7 +27,7 @@ data <- read.csv("./sources/raw/dataset.csv", stringsAsFactors = F)
 colnames(data) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 'timeline')
 data$timeline <- NULL
 data <- as_tibble(data)
-data <- data%>% slice(1:200)
+#data <- data%>% slice(1:200)
 
 # adjust part of datadrame from row 9.362 untill 23.213 (due to bug in scrape function) 
 indices <- c(9362:23213)
@@ -275,4 +275,4 @@ confusionmatrix <- RF$confusion
 
 
 
-
+predict(RF, data$text)
