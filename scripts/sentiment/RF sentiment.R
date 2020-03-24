@@ -23,19 +23,24 @@ p_load(tidyverse,Unicode,tm, rvest, rtweet, stringr)
 # Reading in data ---------------------------------------------
 
 #reading in dataset as tibble
-#data <- read.csv("./sources/cleaned/dataset_cleaned.csv")
-data <- read_csv("./sources/raw/dataset.csv", col_names = F)
+data <- read.csv("./sources/raw/dataset.csv", stringsAsFactors = F)
 colnames(data) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 'timeline')
+data$timeline <- NULL
+data <- as_tibble(data)
+data <- data%>% slice(1:200)
 
-# Debug Mode --------------------------------------------------------------
+# adjust part of datadrame from row 9.362 untill 23.213 (due to bug in scrape function) 
+indices <- c(9362:23213)
+data[indices,'text'] <- data[indices, 'user_id']
+data[indices, c('user_id', 'screenname', 'location')] <- NA
+data[indices, c('timestamp')] <- '2020-03-13'
+rm(indices)
+# Extract text from tibble
+text <- data %>% select(text)
 
-# Place following line in comment if you want to perform data manipulations on entire dateset 
-# otherwise we only look at the first 200 entries 
-#data <- data %>% slice(., 1:200)
+#transforming data to data we can work with
+text <- text %>% mutate(text = iconv(text, from = "latin1", to = "ascii", sub = "byte"))
 
-# Reading in data ---------------------------------------------
-text <- iconv(data$text, from = "latin1", to = "ascii", sub = "byte")
-text <- enframe(text)
 
 
 # constructing emoji dictionary -------------------------------------------
