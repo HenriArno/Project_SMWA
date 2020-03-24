@@ -1,4 +1,3 @@
-
 # Sentiment analysis ------------------------------------------------------
 rm(list=ls())
 
@@ -6,64 +5,23 @@ rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 
-
 # loading required packages -----------------------------------------------
-
 if (!require("pacman")) install.packages("pacman") ; require("pacman")
 p_load(SnowballC, slam, tm, RWeka, Matrix, readr, tidyverse, lubridate)
 
-
-#import dataset and add column names to extract the raw text
-#dataset <- read_csv("dataset_cleaned.csv")
+#import dataset
 library(readr)
-dataset <- read_csv("dataset.csv", col_names = FALSE)
+dataset <- read_csv("./sources/cleaned/dataset_cleaned.csv", col_names = TRUE)
 #View(dataset)
-dataset=dataset %>% 
-  rename(
-    user_id=X1,
-    text=X2,
-    timestamp=X3,
-    screenname=X4,
-    location=X5,
-  )
 
+#order dataset by timestamp column
+dataset<-dataset[order(dataset$timestamp),]  
+
+#test sample to run code faster
 #dataset <- sample_n(dataset, 40000)
 
 text<- dataset %>% select(text)
 created <- dataset%>% select(timestamp)
-
-#clean the text
-cleanText <- function(text) {
-  clean_texts <- text %>%
-    gsub("&amp;", "", .) %>% # remove &
-    gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", .) %>% # remove retweet entities
-    gsub("[ \t]{2,}", " ", .) %>% # remove unnecessary spaces
-    gsub("^\\s+|\\s+$", "", .) %>% # remove unnecessary spaces
-    tolower
-  return(clean_texts)
-}
-
-text_clean <- cleanText(text)
-
-text_clean <- text_clean %>% 
-  replace_url() %>% #will delete the url
-  replace_tag() %>% #replaces @...
-  replace_hash(x, replacement = '$3') %>% #will replace the hastag like this: #rstats -> rstats 
-  replace_contraction() %>%
-  replace_internet_slang() %>% 
-  replace_kern() %>% 
-  replace_word_elongation() %>%
-  replace_white() %>% trimws() #function to delete white spaces
-
-lemma_dictionary_hs <- make_lemma_dictionary(text_clean,
-                                             engine = 'hunspell')
-text_final <- lemmatize_strings(text_clean, dictionary = lemma_dictionary_hs)
-
-#detect emojis and emoticons
-text_final <- text_final %>% 
-  replace_emoji() %>%
-  replace_emoticon()
-
 
 ###################### Load dictionary #####################
 
@@ -79,16 +37,16 @@ dictionary_new$VALENCE <- abs(dictionary$VALENCE-10)-dictionary$VALENCE
 #2)rbind the new and the old dictionary
 dictionary_negation <- rbind(dictionary[,c('Word','VALENCE')], 
                              dictionary_new)
+#remove dictionaries we won't use
 rm(dictionary_new, dictionary)
 
 #3)run all unigrams and bigrams through the dictionary
-
-score_negation <- numeric(dim(text_final)[1])
+score_negation <- numeric(dim(text)[1])
 
 
 for (i in 1:length(score_negation)){
   #define entry
-  entry = (text_final %>% slice(i))[[1]]
+  entry = (text %>% slice(i))[[1]]
   
   #Split up the tweet in words
   unigrams <- strsplit(entry,split=" ")[[1]] 
@@ -120,45 +78,32 @@ for (i in 1:length(score_negation)){
   if (is.na(score_negation[i])) score_negation[i] <- 0 else score_negation[i] <- score_negation[i]-5
   
 }
-#Let's look at the compare the results
+
+#some results
 mean(score_negation) 
 sd(score_negation) 
 hist(score_negation)
 
-####different approach######
 
 #using lubridate, add a column which has the day of the week as string
 breaksday <- created%>% mutate(day(timestamp))
 breaksmonth<-created%>%mutate(month(timestamp))
+
+#tibble -> vector
 days<-deframe(breaksday)
 months<-deframe(breaksmonth)
 
-#make tibble of the scores to join data together 
-#scores <- enframe(score_negation, name=NULL)
-#to_plot <- created%>% add_column(scores) %>% select(-timestamp)
-
-
 
 #Now lets make the plots
-#Group in days and take the average per day
-#handle time zone
 attributes(created)$tzone <- "CET"
 
-
-#get days for tweets
-#breaksday <- as.integer(cut(created, breaks="day"))
-#breaksday <- created$timestamp$mday
-#str(created$timestamp)
-#time<-created$timestamp
-#unclass(time)
-#day(time)
-#Compute mean
+#average and stdev per day
 negations_sd <- aggregate(score_negation,by=list(paste(months,days)),sd)$x
 negations <- aggregate(score_negation,by=list(paste(months,days)),mean)$x
-lim <- max(abs(negations))
-view(negations)
+lim <- max(abs(negations)) #we can use this for graph 
+#view(negations)
 
-#Plot sentiment by time
+#Plot sentiment by day
 plot(1:length(negations), 
      negations, 
      xaxt="n",
@@ -170,6 +115,7 @@ plot(1:length(negations),
      ylim=c(-2,2))
 #length(unique(days))
 
+#add labels on x-as and add stdev
 axis(1,at=1:length(negations), 
      labels=unique(substr(created$timestamp,6,10)))
 lines(negations+negations_sd,col="green")
