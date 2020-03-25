@@ -5,6 +5,7 @@ library(rstudioapi)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd("..")
 if (!require("pacman")) install.packages("pacman") ; require("pacman")
+p_load(rtweet, httr,tidyverse,wordcloud, tm, topicmodels, tidytext, textclean, fastDummies)
 
 
 # loading data ------------------------------------------------------------
@@ -20,7 +21,6 @@ dependent_data <- read.csv("./sources/raw/cancellations.csv")
 
 # Create basetable --------------------------------------------------------
 
-rm(basetable)
 # merge the datasets
 basetable <- sentiment_dict_data %>% 
   merge(sentiment_sentimentr_data1, by = 'text') %>%
@@ -41,21 +41,19 @@ basetable$location.y <- NULL
 
 # recode timestamp variable -> we can't convert to POSIXct type due to length
 basetable$timestamp <- substr(basetable$timestamp, 1, 10)
-unique(basetable$timestamp)
 basetable <- basetable %>% arrange(., timestamp)
-# removal of minor amount of wronglt inputed data
-basetable <- basetable[-c(1:633),]
-
+# removal of minor amount of wrongly inputed data
+basetable <- basetable[-c(1:633,124660:124666),]
 
 # add dependent and average sentiment variable
 # hardcoding to get basetable quickly for prediction
 # Will be changed soon
-dates <- unique(basetable$timestamp)[1:13]
-dependent_data <- dependent_data[5:17,]
-dependent_data$timestamp <- dates
+dependent_data$timestamp <- as.POSIXct(dependent_data$day, format = "%d/%m/%Y")
+dependent_data$day <- NULL
+dependent_data$timestamp <- as.character(dependent_data$timestamp)
 
-dates[14] = "2020-03-24"
-sentiment_day_data$timestamp <- dates
+# STILL CHECK IF THE DATES CORRECTLY MATCH THE NEGATION VALUES!!!!!
+sentiment_day_data$timestamp <- unique(dependent_data$timestamp)[1:nrow(sentiment_day_data)]
 
 basetable <- basetable %>% 
   merge(., sentiment_day_data, by = 'timestamp') %>%
@@ -70,16 +68,22 @@ basetable$day.x <- NULL
 basetable$day.y <- NULL
 basetable$negations.y <- NULL
 
-basetable <- basetable[c('text', 'timestamp', 'user_id', 'screenname', 'location', 'sentiment', 'ave_sentiment.x',
-                         'ave_sentiment.y', 'negations.x', 'best_topic', 'best_topic_gamma', 'topic_1_dummy', 
-                         'topic_2_dummy', 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 'topic_2_gamma',
-                         'topic_3_gamma', 'topic_4_gamma','word_count.x','word_count.y', 'cancelled.flights')]
-  
+relevant_col <- c('text', 'timestamp', 'user_id', 'screenname', 'location', 'sentiment', 'ave_sentiment.x',
+                  'ave_sentiment.y', 'negations', 'best_topic', 'best_topic_gamma', 'topic_1_dummy', 
+                  'topic_2_dummy', 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 'topic_2_gamma',
+                  'topic_3_gamma', 'topic_4_gamma','word_count.x','word_count.y', 'cancelled.flights')
+basetable <- basetable[relevant_col]
+rm(relevant_col)
+
+
 colnames(basetable) <- c('text', 'timestamp', 'user_id', 'screenname', 'location', 'sentiment_dict', 'sentimentr_1',
                          'sentimentr_2', 'sentiment_dict_daily_avg', 'best_topic', 'best_topic_gamma', 'topic_1_dummy', 
                          'topic_2_dummy', 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 'topic_2_gamma',
                          'topic_3_gamma', 'topic_4_gamma','sentimentr_1_wordc','sentimentr_2_wordc', 'cancellations')
 # Write basetable to CSV --------------------------------------------------
 basetable %>% write.csv(., "./sources/cleaned/basetable.csv")
+
+# Read the basetable 
+basetable <- read.csv("./sources/cleaned/basetable.csv")
 
 
