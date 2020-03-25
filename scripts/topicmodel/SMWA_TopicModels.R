@@ -42,30 +42,39 @@ dtm <- freq %>%
 dtm
 inspect(dtm)
 
+
+# This can be ommited for updating dataset --------------------------------
+
 #We must know the optimal number of topics K
 #Iterate k over a number of values  
 #Use the AIC to select the best model (lower is better)
-ldas <- list()
-j <- 0
-for (i in 2:20) {
-  j <- j+1
-  print(i)
+#ldas <- list()
+#j <- 0
+#for (i in 2:20) {
+#  j <- j+1
+#  print(i)
   #We set a seed for the LDA algorithm such that the results are predictable and comparable
   #This uses the VEM optimization algorithm as defined by the inventor (Blei)
   #You can also choose to perform Gibbs sampling (method option)
-  ldas[[j]] <- LDA(x = dtm, k = i, control = list(seed = 1234))
-}
+#  ldas[[j]] <- LDA(x = dtm, k = i, control = list(seed = 1234))
+#}
 
-(AICs <- data.frame(k = 2:20, aic = sapply(ldas, AIC)))
-(K <- AICs$k[which.min(AICs$aic)])
+#(AICs <- data.frame(k = 2:20, aic = sapply(ldas, AIC)))
+#(K <- AICs$k[which.min(AICs$aic)])
 
 # Note that the K with the best performance is 2 (lowest AIC)
 # But the topics are not very meaningfull and we want more predictors for the model
 # Therefore we use a K of 4
 # The AIC difference between K = 2 and K = 4 is also reasonably small
 
+
+
+# Recap here --------------------------------------------------------------
+
+
+
 #Make final LDA
-topicmodel <- LDA(x = dtm, k = K + 2, control = list(seed = 1234))
+#topicmodel <- LDA(x = dtm, k = K + 2, control = list(seed = 1234))
 topicmodel <- LDA(x = dtm, k = 4, control = list(seed = 1234))
 
 ###### Topics and terms
@@ -124,7 +133,7 @@ user_topic_tweet <- fastDummies::dummy_cols(user_topic_tweet, select_columns = "
 doc_topic <- doc_topic %>% spread(., key = 'topic', value = 'gamma')
 
 # Creating final table
-final_table <- inner_join(user_topic_tweet, doc_topic, by = 'document', copy = FALSE)
+final_table <- merge(user_topic_tweet, doc_topic, by = 'document')
 colnames(final_table) <- c('document', 'best_topic', 'best_topic_gamma', 'text', 'topic_1_dummy'
                            , 'topic_2_dummy', 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 
                            'topic_2_gamma', 'topic_3_gamma', 'topic_4_gamma')

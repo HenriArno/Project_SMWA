@@ -1,5 +1,4 @@
 # setwd and load packages -------------------------------------------------
-
 rm(list=ls())
 library(rstudioapi)
 #sets working directory to file directory
@@ -21,7 +20,7 @@ data <- as_tibble(data)
 
 # Place following line in comment if you want to perform data manipulations on entire dateset 
 # otherwise we only look at the first 200 entries 
-data <- data %>% slice(., 1:200)
+#data <- data %>% slice(., 1:200)
 
 # impute missing data ---------------------------------------------------------
 
