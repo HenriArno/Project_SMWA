@@ -12,7 +12,7 @@ p_load(rtweet, httr,tidyverse,wordcloud, tm, topicmodels, tidytext, textclean, f
 
 # Get dataset_cleaned -----------------------------------------------------
 
-data_clean <- read_csv('./sources/cleaned/dataset_cleaned.csv')
+data_clean <- read_csv('./sources/cleaned/dataset_topics_removed.csv')
 
 
 
@@ -48,19 +48,19 @@ inspect(dtm)
 #We must know the optimal number of topics K
 #Iterate k over a number of values  
 #Use the AIC to select the best model (lower is better)
-#ldas <- list()
-#j <- 0
-#for (i in 2:20) {
-#  j <- j+1
-#  print(i)
+ldas <- list()
+j <- 0
+for (i in 2:20) {
+  j <- j+1
+  print(i)
   #We set a seed for the LDA algorithm such that the results are predictable and comparable
   #This uses the VEM optimization algorithm as defined by the inventor (Blei)
   #You can also choose to perform Gibbs sampling (method option)
-#  ldas[[j]] <- LDA(x = dtm, k = i, control = list(seed = 1234))
-#}
+  ldas[[j]] <- LDA(x = dtm, k = i, control = list(seed = 1234))
+}
 
-#(AICs <- data.frame(k = 2:20, aic = sapply(ldas, AIC)))
-#(K <- AICs$k[which.min(AICs$aic)])
+(AICs <- data.frame(k = 2:20, aic = sapply(ldas, AIC)))
+(K <- AICs$k[which.min(AICs$aic)])
 
 # Note that the K with the best performance is 2 (lowest AIC)
 # But the topics are not very meaningfull and we want more predictors for the model
