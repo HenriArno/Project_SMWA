@@ -46,7 +46,7 @@ cleanText <- function(text) {
     gsub("&amp;", "", .) %>% # remove &
     gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", .) %>% # remove retweet entities
     gsub("@\\w+", "", .) %>% # remove at people replace_at() also works
-    gsub("[[:punct:]]", "", .) %>% # remove punctuation
+    #gsub("[[:punct:]]", "", .) %>% # remove punctuation
     gsub("[[:digit:]]", "", .) %>% # remove digits
     gsub("[ \t]{2,}", " ", .) %>% # remove unnecessary spaces
     gsub("^\\s+|\\s+$", "", .) %>% # remove unnecessary spaces
