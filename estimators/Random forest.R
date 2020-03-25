@@ -20,10 +20,11 @@ p_load(tidyverse, caret, randomForest)
 
 #import basetable-----------------------------------------------
 basetable <- read.csv('./sources/cleaned/basetable.csv', header=T)
-basetable <- basetable %>% drop_na() %>% slice(1:2000)
+basetable <- basetable %>% select(-c("text", "user_id", "screenname", "location", "X", "timestamp")) %>% drop_na() #%>% slice(1:2000)
 #set label as y and variables as tibble x
 y <- basetable$cancellations
-x <- basetable %>% select(-c("text", "user_id", "screenname", "location", "cancellations", "X", "timestamp"))
+x <- basetable %>% select(-cancellations)
+
 
 
 # fit Random Forest -------------------------------------------------------
