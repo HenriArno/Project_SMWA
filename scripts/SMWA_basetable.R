@@ -97,10 +97,6 @@ percentage_cancelled_approx <- 0.0117
 basetable$percentage_change <- round((basetable$cancellations / absolute_number_approx) - percentage_cancelled_approx, 4)
 
 
-
-
-
-
 # Write basetable to CSV --------------------------------------------------
 basetable %>% write.csv(., "./sources/cleaned/basetable.csv")
 
