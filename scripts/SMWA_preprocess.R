@@ -68,7 +68,9 @@ remove_topics <- function(text) {
     gsub('CORONA', '', .) %>%
     gsub('COVID19', '', .) %>%
     gsub('virus', '', .) %>%
-    gsub('CORONA19', '',.) 
+    gsub('CORONA19', '',.) %>%
+    gsub('pandemia', '',.) %>%
+    gsub('pandemic', '', .)
   return(clean_texts)
 }
 
@@ -84,6 +86,7 @@ text_clean <- lemmatize_strings(text_clean, dictionary = lemma_dictionary_hs)
 
 # 4. Also remove the topics for topicmodeling
 topic_text <- remove_topics(text_clean)
+
 
 
 
