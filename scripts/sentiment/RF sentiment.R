@@ -168,7 +168,7 @@ write.csv(scores, "./sources/cleaned/training set.csv")
 rm(list = ls())
 #load packages
 library(pacman)
-p_load(SnowballC, slam, tm, RWeka, Matrix)
+p_load(SnowballC, slam, tm, RWeka, Matrix, tidytext)
 #read in data
 data <- read.csv("./sources/cleaned/training set.csv")
 newdata <- read.csv("./sources/cleaned/dataset_cleaned.csv")
@@ -220,14 +220,11 @@ dtm_pred <- DocumentTermMatrix(corpus_pred, control = list(tokenize = Tokenizer,
 # Remember that our test set should contain the same elements as our training dataset
 
 prepareTest <- function (train, test) {
-  Intersect <- test[,intersect(colnames(test), colnames(train))]
-  diffCol <- dtm[,setdiff(colnames(train),colnames(test))]
-  newCols <- as.simple_triplet_matrix(matrix(0,nrow=test$nrow,
-                                             ncol=diffCol$ncol))
-  newCols$dimnames <- diffCol$dimnames
-  testNew<-cbind(Intersect,newCols)
-  testNew<- testNew[,colnames(train)]
-}
+  train <- tidy(train); test <- tidy(test)
+  test <- semi_join(test, train, by="term")
+  test <- test %>% cast_dtm(document, term, count)
+  }
+
 
 dtm_pred <- prepareTest(dtm, dtm_pred)
 
@@ -251,7 +248,7 @@ trainer <- irlba(t(sm), nu=20, nv=20)
 # str(trainer)
 # We are interested in the V
 # str(trainer$v)
-predicotr <- as.data.frame(as.matrix(sm_pred) %*% trainer$u %*%  solve(diag(trainer$d)))
+predictor <- as.data.frame(as.matrix(sm_pred) %*% trainer$u %*%  solve(diag(trainer$d)))
 
 # 5. Modeling and evaluation: Random forest
 
@@ -289,14 +286,19 @@ label <-as.numeric(sub(",", ".", data$score))
 
 #recode label to category in data
 data <- data %>% mutate(cat = cut(label, breaks =c(-Inf,0,0.0000001, Inf), right = F, labels = c("negative", "neutral", "positive")))%>% select(-score) 
-
+label <- data$cat
 #apply RF
 RF <- randomForest(x=as.data.frame(trainer$v),y= as.factor(data$cat),
                    importance=TRUE,ntree=1000)
 preds <- RF$predicted
 error <- RF$err.rate
 confusionmatrix <- RF$confusion
+
 # Calculate AUC
+auc(roc(preds,label))
+
+# ROC curve
+plot(roc(preds,label))
 
 #We can see that although the model will be quite efficient at detecting positive statements, negative statements
 #might pose an issue due to the lower frequency of negative emojis present in our dataset
