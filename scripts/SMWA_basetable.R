@@ -5,7 +5,7 @@ library(rstudioapi)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd("..")
 if (!require("pacman")) install.packages("pacman") ; require("pacman")
-p_load(rtweet, httr,tidyverse,wordcloud, tm, topicmodels, tidytext, textclean, fastDummies)
+p_load(rtweet, httr,tidyverse,wordcloud, tm, topicmodels, tidytext, textclean, fastDummies, ggplot2)
 
 
 # loading data ------------------------------------------------------------
@@ -80,10 +80,35 @@ colnames(basetable) <- c('text', 'timestamp', 'user_id', 'screenname', 'location
                          'sentimentr_2', 'sentiment_dict_daily_avg', 'best_topic', 'best_topic_gamma', 'topic_1_dummy', 
                          'topic_2_dummy', 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 'topic_2_gamma',
                          'topic_3_gamma', 'topic_4_gamma','sentimentr_1_wordc','sentimentr_2_wordc', 'cancellations')
+
+
+# Create additional dependent variabele (percentage change)
+# This is nothing but a rescaling/shift in the data
+
+# source: (https://www.quora.com/How-many-airplanes-fly-each-day-in-the-world)
+# Note that this is a conervative approximation
+absolute_number_approx <- 170000
+
+# source: (https://www.bts.gov/newsroom/december-2016-airline-on-time-performance)
+# baseline: 2016
+percentage_cancelled_approx <- 0.0117
+
+# Create the variable
+basetable$percentage_change <- round((basetable$cancellations / absolute_number_approx) - percentage_cancelled_approx, 4)
+
+
+
+
+
+
 # Write basetable to CSV --------------------------------------------------
 basetable %>% write.csv(., "./sources/cleaned/basetable.csv")
 
 # Read the basetable 
 basetable <- read.csv("./sources/cleaned/basetable.csv")
+
+ggplot(data = basetable, aes(timestamp, cancellations)) +
+  geom_point() +
+  geom_line()
 
 

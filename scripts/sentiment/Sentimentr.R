@@ -52,7 +52,8 @@ valence_shifters_updated <-update_valence_shifter_table(key = hash_valence_shift
 text <- as.vector(data$text)
 text <- text %>% 
   gsub('!', 'exclamation', .) %>%
-  gsub('?', 'question mark', .)
+  gsub('\\?', 'question mark', .)
+
 
 #perform analysis
 sentiment2 <- text %>% get_sentences()%>%sentiment_by(valence_shifters_dt = valence_shifters_updated)
