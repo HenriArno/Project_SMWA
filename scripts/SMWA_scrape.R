@@ -55,8 +55,7 @@ hashtags = as.vector(t(read.delim("./sources/raw/hashtags.txt", header = F)))
 
 
 
-hashtags = hashtags[7:8]
-
+hashtags = hashtags[9:10]
 
 
 for (element in hashtags) {

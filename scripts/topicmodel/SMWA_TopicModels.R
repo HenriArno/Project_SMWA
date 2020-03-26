@@ -12,7 +12,7 @@ p_load(rtweet, httr,tidyverse,wordcloud, tm, topicmodels, tidytext, textclean, f
 
 # Get dataset_cleaned -----------------------------------------------------
 
-data_clean <- read_csv('./sources/cleaned/dataset_cleaned.csv')
+data_clean <- read_csv('./sources/cleaned/dataset_topics_removed.csv')
 
 
 
@@ -42,6 +42,9 @@ dtm <- freq %>%
 dtm
 inspect(dtm)
 
+
+# This can be ommited for updating dataset --------------------------------
+
 #We must know the optimal number of topics K
 #Iterate k over a number of values  
 #Use the AIC to select the best model (lower is better)
@@ -64,8 +67,14 @@ for (i in 2:20) {
 # Therefore we use a K of 4
 # The AIC difference between K = 2 and K = 4 is also reasonably small
 
+
+
+# Recap here --------------------------------------------------------------
+
+
+
 #Make final LDA
-topicmodel <- LDA(x = dtm, k = K + 2, control = list(seed = 1234))
+#topicmodel <- LDA(x = dtm, k = K + 2, control = list(seed = 1234))
 topicmodel <- LDA(x = dtm, k = 4, control = list(seed = 1234))
 
 ###### Topics and terms
@@ -124,7 +133,7 @@ user_topic_tweet <- fastDummies::dummy_cols(user_topic_tweet, select_columns = "
 doc_topic <- doc_topic %>% spread(., key = 'topic', value = 'gamma')
 
 # Creating final table
-final_table <- inner_join(user_topic_tweet, doc_topic, by = 'document', copy = FALSE)
+final_table <- merge(user_topic_tweet, doc_topic, by = 'document')
 colnames(final_table) <- c('document', 'best_topic', 'best_topic_gamma', 'text', 'topic_1_dummy'
                            , 'topic_2_dummy', 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 
                            'topic_2_gamma', 'topic_3_gamma', 'topic_4_gamma')
