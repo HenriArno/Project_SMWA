@@ -23,9 +23,9 @@ dependent_data <- read.csv("./sources/raw/cancellations.csv")
 
 # merge the datasets
 basetable <- sentiment_dict_data %>% 
-  merge(sentiment_sentimentr_data1, by = 'text') %>%
-  merge(sentiment_sentimentr_data2, by = 'text') %>%
-  merge(topic_data, by = 'text')
+  merge(sentiment_sentimentr_data1, by = 'user_id') %>%
+  merge(sentiment_sentimentr_data2, by = 'user_id') %>%
+  merge(topic_data, by = 'user_id')
 
 rm(data,sentiment_dict_data, sentiment_sentimentr_data1, sentiment_sentimentr_data2, topic_data)
 
