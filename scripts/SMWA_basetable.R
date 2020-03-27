@@ -9,12 +9,14 @@ p_load(rtweet, httr,tidyverse,wordcloud, tm, topicmodels, tidytext, textclean, f
 
 
 # loading data ------------------------------------------------------------
-data <- read.csv("./sources/cleaned/dataset_cleaned.csv", stringsAsFactors = F)
-topic_data <- read.csv("./sources/predictors/topic_models.csv", stringsAsFactors = F)
-sentiment_dict_data <- read.csv("./sources/predictors/sentiment_dict.csv", stringsAsFactors = F)
-sentiment_day_data <- read.csv("./sources/predictors/sentiment_dict_day.csv", stringsAsFactors = F)
-sentiment_sentimentr_data1 <- read.csv("./sources/predictors/sentiment_sentimentr_1.csv", stringsAsFactors = F)
-sentiment_sentimentr_data2 <- read.csv("./sources/predictors/sentiment_sentimentr_2.csv", stringsAsFactors = F)
+data <- read.csv("./sources/cleaned/dataset_cleaned.csv", stringsAsFactors = F)%>% arrange(user_id)
+topic_data <- read.csv("./sources/predictors/topic_models.csv", stringsAsFactors = F)%>% arrange(user_id)
+sentiment_dict_data <- read.csv("./sources/predictors/sentiment_dict.csv", stringsAsFactors = F)%>% arrange(user_id)
+sentiment_day_data <- read.csv("./sources/predictors/sentiment_dict_day.csv", stringsAsFactors = F)%>% arrange(user_id)
+sentiment_sentimentr_data1 <- read.csv("./sources/predictors/sentiment_sentimentr_1.csv", stringsAsFactors = F)%>% 
+  mutate (user_id <- as.numeric(user_id))%>% arrange(user_id)
+sentiment_sentimentr_data2 <- read.csv("./sources/predictors/sentiment_sentimentr_2.csv", stringsAsFactors = F)%>% 
+  mutate (user_id <- as.numeric(user_id))%>% arrange(user_id)
 dependent_data <- read.csv("./sources/raw/cancellations.csv")
 #RF_sentiment_data <- read.csv("./sources/predictors/RF_sentiment.csv", stringsAsFactors = F)
 
