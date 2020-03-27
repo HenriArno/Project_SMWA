@@ -41,6 +41,9 @@ sentiment_sentimentr_data2 <- sentiment_sentimentr_data2 %>% drop_na(user_id)
 
 basetable <- sentiment_dict_data
 basetable$bave_sentiment <- sentiment_sentimentr_data2$ave_sentiment
+#andere manier
+basetable <- sentiment_dict_data %>% add_column(sentiment_sentimentr_data1$ave sentiment) %>%
+  add_column(...)
 }
 
 
