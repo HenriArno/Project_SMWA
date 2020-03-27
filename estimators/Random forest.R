@@ -32,7 +32,7 @@ x <- basetable %>% select(-c("percentage_change", "cancellations"))
 
 # fit Random Forest -------------------------------------------------------
 
-RF <- randomForest(x,y, importance= T, ntree = 1000)
+RF <- randomForest(x,y, importance= T,mtry = 8, ntree = 1000)
 
 #assess model accuracy
 mean(RF$mse)
