@@ -14,56 +14,63 @@ setwd("..")
 
 # Load Packages
 if (!require("pacman")) install.packages("pacman") ; require("pacman")
-p_load(tidyverse,vars)
+p_load(tidyverse,vars,car)
 
 #import basetable
 data <- read.csv('./sources/cleaned/basetable.csv', header=T)
 
 #inspect basetable
-View(data)
+#View(data)
 
 #how many variables to include?
 basetable <- data[,7:23]
 basetable <- cbind(data$timestamp,basetable)
+colnames(basetable)[1] <- "timestamp"
 
 #Missing Values
 apply(basetable, 2, function(x) any(is.na(x)))
-#NA value in cancellations
+#No missing values
 
-
-for(i in nrow(basetable)){
-  if(is.na(basetable[i,18])){
-    #take average
-    
-  }
-}
-
-apply(basetable, 2, function(x) any(is.na(x)))
-
-#For now, delete missing values
-basetable <- basetable %>% drop_na()
-
-#Check for multicol.
+#Adjust for multicol.
 basetable$best_topic <- NULL
 basetable$best_topic_gamma <- NULL
 basetable$sentiment_dict_daily_avg <- NULL
 basetable$sentimentr_2 <- NULL
-colnames(basetable)[1] <- "timestamp"
-basetable$topic_4_gamma <- NULL
+basetable$topic_1_dummy <- NULL
+basetable$topic_2_dummy <- NULL
+basetable$topic_3_dummy <- NULL
+basetable$topic_4_dummy <- NULL
+
 
 #Data visualization
 plot(basetable$cancellations~basetable$timestamp)
 
-#groupby date
+#groupby date , useless because only 10rows?
+basetable_group <- basetable %>% group_by(basetable$timestamp) %>% summarise_all("mean")
+colnames(basetable_group)[1] <- "timestamp"
+basetable_group[,2] <- NULL
 
-basetable <- basetable %>% group_by(basetable$timestamp) %>% summarise_all("mean")
-colnames(basetable)[1] <- "timestamp"
-basetable[,2] <- NULL
-str(basetable)
+#Try small example: 
+
+try <- basetable[,(c('sentiment_dict_daily_avg' ,'cancellations'))]
+VARselect(try, lag.max=8,type="const")
+var4 <- VAR(try, p=1, type="const")
+serial.test(var4, lags.pt=16, type="PT.asymptotic")
+
+summary(var4, equation = "cancellations")
+var4
+
+forecast(var4) %>%
+  autoplot() + xlab("Day")
+
+
+
+
+
+
 
 #How many lags to include?
-VARselect(basetable[,2:13], lag.max=4,
-          type="both")[["selection"]]
+VARselect(basetable[,2:10], lag.max=4,type="both")
 
 #Care should be taken when using the AIC as it tends to choose large numbers of lags. 
 #Instead, for VAR models, we prefer to use the BIC
@@ -71,31 +78,8 @@ VARselect(basetable[,2:13], lag.max=4,
 #modeling
 
 
-#LM model
+var2 <- VAR(basetable[,2:10], p=2, type="both")
 
-dep <- "cancellations"
-
-indep <- basetable
-indep$timestamp <- NULL
-indep$cancellations <- NULL
-indep <- colnames(indep)
-lm_data <- basetable
-lm_data$timestamp <- NULL
-
-
-model <- lm(basetable$cancellations ~ basetable$sentiment_dict + basetable$sentimentr_1 +basetable$topic_1_dummy 
-            +basetable$topic_2_dummy +basetable$topic_3_dummy +basetable$topic_4_dummy +basetable$topic_1_gamma 
-            +basetable$topic_2_gamma +basetable$topic_3_gamma +basetable$sentimentr_1_wordc +basetable$sentimentr_2_wordc)
-
-summary(model)
-
-
-
-
-
-#VAR model
-
-var1 <- VAR(basetable[,2:13], p=1, type="both")
 summary(var1, equation = "cancellations")
 
 #matrix is not invertible, vectors are probably colinear
@@ -117,7 +101,7 @@ serial.test(var3, lags.pt=10, type="PT.asymptotic")
 #> Chi-squared = ??, df = ??, p-value = ??
 
 #plot the generated forecast
-forecast(var3) %>%
+forecast(var4) %>%
   autoplot() + xlab("Year")
 
 
