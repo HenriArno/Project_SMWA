@@ -20,14 +20,38 @@ dependent_data <- read.csv("./sources/raw/cancellations.csv")
 
 
 # Create basetable --------------------------------------------------------
-sentiment_sentimentr_data1$user_id <- as.numeric(sentiment_sentimentr_data1$user_id)
+
+
+
+
+
+#alternative
+{
 sentiment_sentimentr_data2$user_id <- as.numeric(sentiment_sentimentr_data2$user_id)
+sentiment_dict_data <- as_tibble(sentiment_dict_data)
+topic_data <- as_tibble(topic_data)
+sentiment_sentimentr_data2 <- as_tibble(sentiment_sentimentr_data2)
+
+sentiment_dict_data <- sentiment_dict_data %>% arrange(user_id)
+sentiment_dict_data <- sentiment_dict_data %>% drop_na(user_id)
+topic_data <- topic_data %>% arrange(user_id)
+topic_data <- topic_data %>% drop_na(user_id)
+sentiment_sentimentr_data2 <- sentiment_sentimentr_data2 %>% arrange(user_id)
+sentiment_sentimentr_data2 <- sentiment_sentimentr_data2 %>% drop_na(user_id)
+
+basetable <- sentiment_dict_data
+basetable$bave_sentiment <- sentiment_sentimentr_data2$ave_sentiment
+}
+
+
+
+
 
 # merge the datasets
-basetable <- sentiment_dict_data %>% 
-  inner_join(sentiment_sentimentr_data1, by = 'user_id') %>%
-  inner_join(sentiment_sentimentr_data2, by = 'user_id') %>%
-  inner_join(topic_data, by = 'user_id')
+basetable <- sentiment_dict_data  %>%
+  merge(topic_data, by = 'user_id') %>%
+  merge(sentiment_sentimentr_data2, by = 'user_id')
+  
 
 rm(data,sentiment_dict_data, sentiment_sentimentr_data1, sentiment_sentimentr_data2, topic_data)
 
@@ -42,6 +66,23 @@ basetable$user_id.y <- NULL
 basetable$timestamp.y <- NULL
 basetable$screenname.y <- NULL
 basetable$location.y <- NULL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # recode timestamp variable -> we can't convert to POSIXct type due to length
 basetable$timestamp <- substr(basetable$timestamp, 1, 10)
