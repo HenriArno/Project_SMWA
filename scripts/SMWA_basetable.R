@@ -29,6 +29,7 @@ sentiment_dict_data <- as_tibble(sentiment_dict_data)
 sentiment_dict_data <- sentiment_dict_data %>% arrange(user_id)
 sentiment_dict_data <- sentiment_dict_data %>% drop_na(user_id)
 
+
 topic_data <- as_tibble(topic_data)
 topic_data <- topic_data %>% arrange(user_id)
 topic_data <- topic_data %>% drop_na(user_id)
