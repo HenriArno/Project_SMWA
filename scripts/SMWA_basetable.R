@@ -24,39 +24,51 @@ dependent_data <- read.csv("./sources/raw/cancellations.csv")
 # Create basetable --------------------------------------------------------
 
 
-
-
-
-#alternative
-{
-sentiment_sentimentr_data2$user_id <- as.numeric(sentiment_sentimentr_data2$user_id)
+#set basetable in right format and order
 sentiment_dict_data <- as_tibble(sentiment_dict_data)
-topic_data <- as_tibble(topic_data)
-sentiment_sentimentr_data2 <- as_tibble(sentiment_sentimentr_data2)
-
 sentiment_dict_data <- sentiment_dict_data %>% arrange(user_id)
 sentiment_dict_data <- sentiment_dict_data %>% drop_na(user_id)
+
+topic_data <- as_tibble(topic_data)
 topic_data <- topic_data %>% arrange(user_id)
 topic_data <- topic_data %>% drop_na(user_id)
+
+
+sentiment_sentimentr_data2 <- as_tibble(sentiment_sentimentr_data2)
+sentiment_sentimentr_data2$user_id <- as.numeric(sentiment_sentimentr_data2$user_id)
 sentiment_sentimentr_data2 <- sentiment_sentimentr_data2 %>% arrange(user_id)
 sentiment_sentimentr_data2 <- sentiment_sentimentr_data2 %>% drop_na(user_id)
 
-basetable <- sentiment_dict_data
-basetable$bave_sentiment <- sentiment_sentimentr_data2$ave_sentiment
-#andere manier
-basetable <- sentiment_dict_data %>% add_column(sentiment_sentimentr_data1$ave sentiment) %>%
-  add_column(...)
-}
+#Create basetable
 
+#overview of relevant columns
+sdd <- colnames(sentiment_dict_data)
+ssd2 <- colnames(sentiment_sentimentr_data2)
+td <- colnames(topic_data)
+sdd
+ssd2
+td
 
+#add relevant columns
+basetable <- sentiment_dict_data %>%
+  add_column(sentiment_sentimentr_data2$word_count) %>% 
+  add_column(sentiment_sentimentr_data2$ave_sentiment)%>% 
+  add_column(topic_data$best_topic)%>% 
+  add_column(topic_data$best_topic_gamma)%>% 
+  add_column(topic_data$topic_1_dummy)%>% 
+  add_column(topic_data$topic_2_dummy)%>% 
+  add_column(topic_data$topic_3_dummy)%>% 
+  add_column(topic_data$topic_4_dummy)%>% 
+  add_column(topic_data$topic_1_gamma)%>% 
+  add_column(topic_data$topic_2_gamma)%>% 
+  add_column(topic_data$topic_3_gamma)%>% 
+  add_column(topic_data$topic_4_gamma)
 
+colnames(basetable) <- c("user_id","text","timestamp","screenname","location","sentiment","word_count","ave_sentiment",
+                         "best_topic","best_topic_gamma","topic_1_dummy","topic_2_dummy","topic_3_dummy","topic_4_dummy",
+                         "topic_1_gamma","topic_2_gamma","topic_3_gamma","topic_4_gamma")
 
-
-# merge the datasets
-basetable <- sentiment_dict_data  %>%
-  merge(topic_data, by = 'user_id') %>%
-  merge(sentiment_sentimentr_data2, by = 'user_id')
-  
+#topic data heeft niet evenveel rows als sdd en ssd2
 
 rm(data,sentiment_dict_data, sentiment_sentimentr_data1, sentiment_sentimentr_data2, topic_data)
 
