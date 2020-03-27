@@ -19,7 +19,10 @@ p_load(tidyverse, caret, nnet)
 #import basetable-----------------------------------------------
 basetable <- read.csv('./sources/cleaned/basetable.csv', header=T)
 #deselecting unused columns (and slicing for now)
-basetable <- basetable %>% select(-c("text", "user_id", "screenname", "location", "X", "timestamp")) %>% drop_na()
+basetable <- basetable %>% select(c("sentiment_dict", "sentimentr_1","sentimentr_2", 
+                                    "percentage_change", "topic_1_dummy","topic_2_dummy",
+                                    "topic_3_dummy","topic_4_dummy","timestamp", "cancellations")) %>% 
+  drop_na() #%>% slice(1:2000)
 #set label as y and variables as tibble x
 
 
@@ -29,7 +32,7 @@ basetable <- basetable %>% select(-c("text", "user_id", "screenname", "location"
 #set starting grid
 mygrid <- expand.grid(.decay=c(0.5, 0.1), .size=c(4,5,6))
 #get max value dependent variable
-max <- max(basetable$cancellations)
+#max <- max(basetable$cancellations)
 #set neural network
-nnetfit <- train(cancellations/max~., data = basetable, method="nnet", maxit=1000, tuneGrid=mygrid, trace=F) 
+nnetfit <- train(percentage_change~., data = basetable, method="nnet", maxit=1000, tuneGrid=mygrid, trace=F) 
 print(nnetfit)
