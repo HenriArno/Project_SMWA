@@ -106,7 +106,7 @@ plot(1:length(negations),
      type="o",
      ylab="Valence",
      xlab="day",
-     main="Sentiment by day", 
+     main="Sentiment by day", ☻
      #ylim=c(-lim,lim))
      ylim=c(-2,2))
 #length(unique(days))

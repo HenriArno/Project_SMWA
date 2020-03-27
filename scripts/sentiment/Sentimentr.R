@@ -36,9 +36,6 @@ data$X<-sentiment$element_id
 #join everything in tibble to get a clear result
 result <- sentiment%>%select(-c(element_id, sd))%>% merge(data, by = 'X') %>% select(-X)
 
-write_csv(result, './sources/predictors/sentiment_sentimentr_1.csv')
-
-
 # Sentiment with punctuation ----------------------------------------------
 #We are not looking at punctuation in the previous case however, 
 #which is why we will update the Valence shifters table here
@@ -59,6 +56,7 @@ text <- text %>%
 sentiment2 <- text %>% get_sentences()%>%sentiment_by(valence_shifters_dt = valence_shifters_updated)
 #make matching index columns
 sentiment2$X <-  sentiment2$element_id
+data <- data%>%rowid_to_column( 'X')
 #join everything in tibble to get a clear result
 result2 <- sentiment2%>%select(-c(element_id, sd))%>% merge(data, by = 'X') %>% select(-X)
 

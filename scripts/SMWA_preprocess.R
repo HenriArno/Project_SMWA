@@ -13,7 +13,7 @@ p_load(httr,rtweet,tidyverse,textclean, textstem, sentimentr, lexicon, maps, dpl
 data <- read.csv("./sources/raw/dataset.csv", stringsAsFactors = F)
 colnames(data) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 'timeline')
 data$timeline <- NULL
-data <- as_tibble(data)
+data <- as_tibble(data) %>% rowid_to_column()
 
 
 # Debug Mode --------------------------------------------------------------
@@ -95,6 +95,7 @@ topic_text <- remove_topics(text_clean)
 data$text <- text_clean
 data <- data[!duplicated(data$text),]
 
+
 #Save clean data
 write_csv(data, './sources/cleaned/dataset_cleaned.csv')
 
@@ -105,7 +106,7 @@ write_csv(data, './sources/cleaned/dataset_cleaned.csv')
 data <- read.csv("./sources/raw/dataset.csv", stringsAsFactors = F)
 colnames(data) <- c('user_id', 'text', 'timestamp', 'screenname', 'location', 'timeline')
 data$timeline <- NULL
-data <- as_tibble(data)
+data <- as_tibble(data)%>% rowid_to_column()
 
 indices <- c(9362:23213)
 data[indices,'text'] <- data[indices, 'user_id']

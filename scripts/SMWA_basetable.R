@@ -1,23 +1,24 @@
 # loading packages --------------------------------------------------------
 rm(list=ls())
-#library(rstudioapi)
+library(rstudioapi)
 #sets working directory to file directory
-#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-#setwd("..")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd("..")
 if (!require("pacman")) install.packages("pacman") ; require("pacman")
 p_load(rtweet, httr,tidyverse,wordcloud, tm, topicmodels, tidytext, textclean, fastDummies, ggplot2)
 
 
 # loading data ------------------------------------------------------------
-data <- read.csv("./sources/cleaned/dataset_cleaned.csv", stringsAsFactors = F)%>% arrange(user_id)
-topic_data <- read.csv("./sources/predictors/topic_models.csv", stringsAsFactors = F)%>% arrange(user_id)
-sentiment_dict_data <- read.csv("./sources/predictors/sentiment_dict.csv", stringsAsFactors = F)%>% arrange(user_id)
-sentiment_day_data <- read.csv("./sources/predictors/sentiment_dict_day.csv", stringsAsFactors = F)%>% arrange(user_id)
-sentiment_sentimentr_data1 <- read.csv("./sources/predictors/sentiment_sentimentr_1.csv", stringsAsFactors = F)%>% 
-  mutate (user_id <- as.numeric(user_id))%>% arrange(user_id)
-sentiment_sentimentr_data2 <- read.csv("./sources/predictors/sentiment_sentimentr_2.csv", stringsAsFactors = F)%>% 
-  mutate (user_id <- as.numeric(user_id))%>% arrange(user_id)
-dependent_data <- read.csv("./sources/raw/cancellations.csv")
+data <- as_tibble(read.csv("./sources/cleaned/dataset_cleaned.csv", stringsAsFactors = F))
+topic_data <- as_tibble(read.csv("./sources/predictors/topic_models.csv", stringsAsFactors = F)) %>% select(-c('text', 'user_id'))
+sentiment_dict_data <- as_tibble(read.csv("./sources/predictors/sentiment_dict.csv", stringsAsFactors = F))%>% select(-c('text', 'user_id', 'location', 'timestamp'))
+sentiment_day_data <- as_tibble(read.csv("./sources/predictors/sentiment_dict_day.csv", stringsAsFactors = F))
+sentiment_sentimentr_data1 <- as_tibble(read.csv("./sources/predictors/sentiment_sentimentr_1.csv", stringsAsFactors = F))%>% 
+  select(-c('text', 'user_id', 'timestamp', 'screenname', 'location'))
+sentiment_sentimentr_data2 <- as_tibble(read.csv("./sources/predictors/sentiment_sentimentr_2.csv", stringsAsFactors = F))%>% 
+  select(-c('text', 'user_id', 'timestamp', 'screenname', 'location'))
+dependent_data <- as_tibble(read.csv("./sources/raw/cancellations.csv"))
+
 #RF_sentiment_data <- read.csv("./sources/predictors/RF_sentiment.csv", stringsAsFactors = F)
 
 
@@ -25,100 +26,19 @@ dependent_data <- read.csv("./sources/raw/cancellations.csv")
 
 
 # Create basetable --------------------------------------------------------
+#add missing user ID's for topic data
+index <- enframe(data$rowid, name=NULL, value = "rowid")
+topic_data <- left_join(index, topic_data, by = "rowid") %>% replace(is.na(.), 0)
+
+#try left joins
+basetable <- full_join(data, topic_data, by="rowid") %>% 
+  full_join(sentiment_dict_data, by="rowid")%>%
+  full_join(sentiment_sentimentr_data2, by="rowid")
 
 
-#set basetable in right format and order
-sentiment_dict_data <- as_tibble(sentiment_dict_data)
-sentiment_dict_data <- sentiment_dict_data %>% arrange(user_id)
-sentiment_dict_data <- sentiment_dict_data %>% drop_na(user_id)
 
-
-topic_data <- as_tibble(topic_data)
-topic_data <- topic_data %>% arrange(user_id)
-topic_data <- topic_data %>% drop_na(user_id)
-
-
-sentiment_sentimentr_data2 <- as_tibble(sentiment_sentimentr_data2)
-sentiment_sentimentr_data2$user_id <- as.numeric(sentiment_sentimentr_data2$user_id)
-sentiment_sentimentr_data2 <- sentiment_sentimentr_data2 %>% arrange(user_id)
-sentiment_sentimentr_data2 <- sentiment_sentimentr_data2 %>% drop_na(user_id)
-
-#Create basetable
-
-#overview of relevant columns
-sdd <- colnames(sentiment_dict_data)
-ssd2 <- colnames(sentiment_sentimentr_data2)
-td <- colnames(topic_data)
-sdd
-ssd2 <- ssd2[1:2]
-td <- td[3:12]
-
-#add relevant columns
-
-
-#basetable <- sentiment_dict_data %>%
-  #add_column(sentiment_sentimentr_data2$word_count) %>% 
-  #add_column(sentiment_sentimentr_data2$ave_sentiment)
-
-for(name in td){
-  print(name)
-  #basetable <- basetable %>% add_column(topic_data$name)
-  #basetable <- basetable %>% add_column(topic_data[,name])
-  
-  #dat werkt precies nie 
-}
-
-#hard code version (should do the same thing)
-
-basetable <- sentiment_dict_data %>%
-  add_column(sentiment_sentimentr_data2$word_count) %>% 
-  add_column(sentiment_sentimentr_data2$ave_sentiment)%>%
-  add_column(topic_data$best_topic)%>% 
-  add_column(topic_data$best_topic_gamma)%>% 
-  add_column(topic_data$topic_1_dummy)%>% 
-  add_column(topic_data$topic_2_dummy)%>% 
-  add_column(topic_data$topic_3_dummy)%>% 
-  add_column(topic_data$topic_4_dummy)%>% 
-  add_column(topic_data$topic_1_gamma)%>% 
-  add_column(topic_data$topic_2_gamma)%>% 
-  add_column(topic_data$topic_3_gamma)%>% 
-  add_column(topic_data$topic_4_gamma)
-
-
-#adjust the column names
-colnames(basetable) <- c("user_id","text","timestamp","screenname","location","sentiment","word_count","ave_sentiment",
-                         "best_topic","best_topic_gamma","topic_1_dummy","topic_2_dummy","topic_3_dummy","topic_4_dummy",
-                         "topic_1_gamma","topic_2_gamma","topic_3_gamma","topic_4_gamma")
-
-#topic data heeft niet evenveel rows als sdd en ssd2
 
 rm(data,sentiment_dict_data, sentiment_sentimentr_data1, sentiment_sentimentr_data2, topic_data)
-
-
-
-# remove redundant columns
-basetable$user_id.x <- NULL
-basetable$timestamp.x <- NULL
-basetable$screenname.x <- NULL
-basetable$location.x <- NULL
-basetable$user_id.y <- NULL
-basetable$timestamp.y <- NULL
-basetable$screenname.y <- NULL
-basetable$location.y <- NULL
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
