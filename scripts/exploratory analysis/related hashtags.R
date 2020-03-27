@@ -17,6 +17,7 @@ p_load(tidyverse,tm,wordcloud, wordcloud2, dplyr)
 
 #extracting the text of the tweets in the dataset
 dataset <- read.csv('./sources/raw/dataset.csv', header=F)
+dataset <- dataset[1:20000,]
 text <- dataset$V2
 #create term-by-document matrix
 content <- Corpus(VectorSource(text))
@@ -68,7 +69,7 @@ d <- tibble(word = names(v),freq=v) #or a data.frame(word = names(v),freq=v)
 d <- filter(d, grepl(pattern="^#.*", d$word))
 
 #remove hashtags already in use
-hashtags <- (read.delim("hashtags.txt", header = F))
+hashtags <- (read.delim("./sources/raw/hashtags.txt", header = F))
 hashtags <- lapply(hashtags$V1, tolower)
 for(tag in hashtags){
   d <- d %>% filter(!grepl(tag, word))
