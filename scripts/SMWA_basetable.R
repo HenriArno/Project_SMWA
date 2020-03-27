@@ -21,6 +21,9 @@ dependent_data <- read.csv("./sources/raw/cancellations.csv")
 #RF_sentiment_data <- read.csv("./sources/predictors/RF_sentiment.csv", stringsAsFactors = F)
 
 
+#sentiment_day_data has no user_id !
+
+
 # Create basetable --------------------------------------------------------
 
 
@@ -47,13 +50,29 @@ sdd <- colnames(sentiment_dict_data)
 ssd2 <- colnames(sentiment_sentimentr_data2)
 td <- colnames(topic_data)
 sdd
-ssd2
-td
+ssd2 <- ssd2[1:2]
+td <- td[3:12]
 
 #add relevant columns
+
+
+#basetable <- sentiment_dict_data %>%
+  #add_column(sentiment_sentimentr_data2$word_count) %>% 
+  #add_column(sentiment_sentimentr_data2$ave_sentiment)
+
+for(name in td){
+  print(name)
+  #basetable <- basetable %>% add_column(topic_data$name)
+  #basetable <- basetable %>% add_column(topic_data[,name])
+  
+  #dat werkt precies nie 
+}
+
+#hard code version (should do the same thing)
+
 basetable <- sentiment_dict_data %>%
   add_column(sentiment_sentimentr_data2$word_count) %>% 
-  add_column(sentiment_sentimentr_data2$ave_sentiment)%>% 
+  add_column(sentiment_sentimentr_data2$ave_sentiment)%>%
   add_column(topic_data$best_topic)%>% 
   add_column(topic_data$best_topic_gamma)%>% 
   add_column(topic_data$topic_1_dummy)%>% 
@@ -65,6 +84,8 @@ basetable <- sentiment_dict_data %>%
   add_column(topic_data$topic_3_gamma)%>% 
   add_column(topic_data$topic_4_gamma)
 
+
+#adjust the column names
 colnames(basetable) <- c("user_id","text","timestamp","screenname","location","sentiment","word_count","ave_sentiment",
                          "best_topic","best_topic_gamma","topic_1_dummy","topic_2_dummy","topic_3_dummy","topic_4_dummy",
                          "topic_1_gamma","topic_2_gamma","topic_3_gamma","topic_4_gamma")
