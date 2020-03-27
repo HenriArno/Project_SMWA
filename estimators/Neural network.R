@@ -18,13 +18,20 @@ p_load(tidyverse, caret, nnet)
 
 #import basetable-----------------------------------------------
 basetable <- read.csv('./sources/cleaned/basetable.csv', header=T)
-#deselecting unused columns (and slicing for now)
-basetable <- basetable %>% select(c("sentiment_dict", "sentimentr_1","sentimentr_2", 
+#Selecting relevant columns and recoding datetime to character for dummy coding later
+basetable <- basetable %>% select(c("sentiment_dict", "sentimentr_2", 
                                     "percentage_change", "topic_1_dummy","topic_2_dummy",
                                     "topic_3_dummy","topic_4_dummy","timestamp", "cancellations")) %>% 
-  drop_na() #%>% slice(1:2000)
-#set label as y and variables as tibble x
+  drop_na() %>% mutate(timestamp = as.character(timestamp))
 
+# Random sampling
+samplesize = 0.75 * nrow(basetable)
+set.seed(80)
+index = sample( seq_len ( nrow ( basetable ) ), size = samplesize )
+
+# Create training and test set
+datatrain = basetable[ index, ] #Training set is used to find the relationship between dependent and independent variables
+datatest = basetable[ -index, ] # test set assesses the performance of the model
 
 # Implementing neural network ---------------------------------------------
 #using caret we will set the hyperparameters of the neural network: decay and size
@@ -34,5 +41,9 @@ mygrid <- expand.grid(.decay=c(0.5, 0.1), .size=c(4,5,6))
 #get max value dependent variable
 #max <- max(basetable$cancellations)
 #set neural network
-nnetfit <- train(percentage_change~. -cancellations, data = basetable, method="nnet", maxit=1000, tuneGrid=mygrid, trace=F) 
+nnetfit <- train(percentage_change~. -cancellations, data = datatrain, method="nnet", maxit=1000, tuneGrid=mygrid, trace=F) 
 print(nnetfit)
+
+preds <- predict(nnetfit, datatest)
+#calculate mape
+MAPE <- mean(abs((datatest$percentage_change-preds)/datatest$percentage_change) * 100)
