@@ -22,7 +22,7 @@ basetable <- read.csv('./sources/cleaned/basetable.csv', header=T)
 basetable <- basetable %>% select(c("sentiment_dict", "sentimentr_2", 
                                     "percentage_change", "topic_1_dummy","topic_2_dummy",
                                     "topic_3_dummy","topic_4_dummy","timestamp", "cancellations")) %>% 
-  drop_na() %>% mutate(timestamp = as.character(timestamp))
+  drop_na()
 
 # Random sampling
 samplesize = 0.75 * nrow(basetable)
