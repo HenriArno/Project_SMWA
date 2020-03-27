@@ -20,7 +20,7 @@ data_clean <- read_csv('./sources/cleaned/dataset_topics_removed.csv')
 
 # Place following line in comment if you want to perform data manipulations on entire dateset 
 # otherwise we only look at the first 200 entries 
-#data_clean <- data_clean %>% slice(., 1:200)
+data_clean <- data_clean %>% slice(., 1:200)
 
 
 # Topic Modeling ----------------------------------------------------------
@@ -126,16 +126,17 @@ user_topic_tweet <- user_topic %>%
 
 # Create final dataset ----------------------------------------------------
 
-# Create predictors as dumies
-user_topic_tweet <- fastDummies::dummy_cols(user_topic_tweet, select_columns = "topic")
+# Create predictors as dummies
+user_topic_tweet <- fastDummies::dummy_cols(user_topic_tweet, select_columns = "topic",
+                                            remove_first_dummy = T)
 
 # Create predictors as percentages
 doc_topic <- doc_topic %>% spread(., key = 'topic', value = 'gamma')
 
 # Creating final table
 final_table <- merge(user_topic_tweet, doc_topic, by = 'document')
-colnames(final_table) <- c('document', 'best_topic', 'best_topic_gamma', 'text', 'topic_1_dummy'
-                           , 'topic_2_dummy', 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 
+colnames(final_table) <- c('document', 'best_topic', 'best_topic_gamma', 'text', 'topic_2_dummy'
+                           , 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 
                            'topic_2_gamma', 'topic_3_gamma', 'topic_4_gamma')
 
 final_table <- merge(final_table, data_clean[c('text','user_id')], by = 'text')

@@ -1,9 +1,9 @@
 # loading packages --------------------------------------------------------
 rm(list=ls())
-library(rstudioapi)
+#library(rstudioapi)
 #sets working directory to file directory
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-setwd("..")
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd("..")
 if (!require("pacman")) install.packages("pacman") ; require("pacman")
 p_load(rtweet, httr,tidyverse,wordcloud, tm, topicmodels, tidytext, textclean, fastDummies, ggplot2)
 
@@ -20,14 +20,18 @@ dependent_data <- read.csv("./sources/raw/cancellations.csv")
 
 
 # Create basetable --------------------------------------------------------
+sentiment_sentimentr_data1$user_id <- as.numeric(sentiment_sentimentr_data1$user_id)
+sentiment_sentimentr_data2$user_id <- as.numeric(sentiment_sentimentr_data2$user_id)
 
 # merge the datasets
 basetable <- sentiment_dict_data %>% 
-  merge(sentiment_sentimentr_data1, by = 'user_id') %>%
-  merge(sentiment_sentimentr_data2, by = 'user_id') %>%
-  merge(topic_data, by = 'user_id')
+  inner_join(sentiment_sentimentr_data1, by = 'user_id') %>%
+  inner_join(sentiment_sentimentr_data2, by = 'user_id') %>%
+  inner_join(topic_data, by = 'user_id')
 
 rm(data,sentiment_dict_data, sentiment_sentimentr_data1, sentiment_sentimentr_data2, topic_data)
+
+
 
 # remove redundant columns
 basetable$user_id.x <- NULL
