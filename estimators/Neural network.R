@@ -19,9 +19,10 @@ p_load(tidyverse, caret, nnet)
 #import basetable-----------------------------------------------
 basetable <- read.csv('./sources/cleaned/basetable.csv', header=T)
 #Selecting relevant columns and recoding datetime to character for dummy coding later
-basetable <- basetable %>% select(c("sentiment_dict", "sentimentr_2", 
-                                    "percentage_change", "topic_1_dummy","topic_2_dummy",
-                                    "topic_3_dummy","topic_4_dummy","timestamp", "cancellations")) %>% 
+basetable <- basetable %>% select(c("sentiment_dict", "sentimentr", 
+                                    "percentage_change","topic_2_dummy",
+                                    "topic_3_dummy","topic_4_dummy","timestamp_numeric", "topic_1_gamma",
+                                    "topic_2_gamma", 'topic_3_gamma','topic_4_gamma' ,"cancellations")) %>% 
   drop_na()
 
 # Random sampling
@@ -39,11 +40,12 @@ datatest = basetable[ -index, ] # test set assesses the performance of the model
 #set starting grid
 mygrid <- expand.grid(.decay=c(0.5, 0.1), .size=c(4,5,6))
 #get max value dependent variable
-#max <- max(basetable$cancellations)
+max <- max(basetable$cancellations)
 #set neural network
 nnetfit <- train(percentage_change~. -cancellations, data = datatrain, method="nnet", maxit=1000, tuneGrid=mygrid, trace=F) 
 print(nnetfit)
 
 preds <- predict(nnetfit, datatest)
+datatest$predicted <- preds
 #calculate mape
 MAPE <- mean(abs((datatest$percentage_change-preds)/datatest$percentage_change) * 100)

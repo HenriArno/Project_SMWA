@@ -20,10 +20,11 @@ p_load(tidyverse, caret, randomForest)
 
 #import basetable-----------------------------------------------
 basetable <- read.csv('./sources/cleaned/basetable.csv', header=T)
-basetable <- basetable %>% select(c("sentiment_dict", "sentimentr_1","sentimentr_2", 
-                                    "percentage_change", "topic_1_dummy","topic_2_dummy",
-                                    "topic_3_dummy","topic_4_dummy","timestamp", "cancellations")) %>% 
-                                      drop_na() #%>% slice(1:2000)
+basetable <- basetable %>% select(c("sentiment_dict", "sentimentr", 
+                                    "percentage_change","topic_2_dummy",
+                                    "topic_3_dummy","topic_4_dummy","timestamp_numeric", "topic_1_gamma",
+                                    "topic_2_gamma", 'topic_3_gamma','topic_4_gamma' ,"cancellations")) %>% 
+  drop_na()
 #set label as y and variables as tibble x
 y <- basetable$cancellations
 x <- basetable %>% select(-c("percentage_change", "cancellations"))
