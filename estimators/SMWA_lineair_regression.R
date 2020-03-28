@@ -18,8 +18,6 @@ attach(basetable)
 
 
 # Adjust basetable --------------------------------------------------------
-basetable <- fastDummies::dummy_cols(basetable, 'timestamp', remove_first_dummy = T)
-?fastDummies::dummy_cols()
 basetable$X <- NULL
 basetable$text <- NULL
 basetable$timestamp <- NULL
@@ -29,15 +27,11 @@ basetable$location <- NULL
 basetable$best_topic <- NULL
 basetable$best_topic_gamma <- NULL
 basetable$percentage_change <- NULL
-basetable$sentimentr_1_wordc <- NULL
-basetable$sentimentr_2_wordc <- NULL
+
 
 # Some exploratory analysis -----------------------------------------------
-relevant <- c('cancellations', 'sentiment_dict' , 'sentimentr_1' , 
-              'sentiment_dict_daily_avg' , 'topic_1_dummy' , 'topic_2_dummy' ,'topic_3_dummy' , 'topic_4_dummy' ,
-              'topic_1_gamma' , 'topic_2_gamma' , 'topic_3_gamma' , 'topic_4_gamma')
-
-#ggpairs(basetable[relevant])
+#ggpairs(basetable)
+cor(basetable)
 
 # Linear regression model -------------------------------------------------
 
@@ -49,21 +43,15 @@ train <- subset(basetable, sample == T)
 test <- subset(basetable, sample == F)
 
 # Create model
-model_OLS_1 <- lm(cancellations ~ sentiment_dict + sentimentr_2 + 
-                  sentiment_dict_daily_avg + topic_1_dummy + topic_2_dummy +topic_3_dummy + topic_4_dummy +
-                  topic_1_gamma + topic_2_gamma + topic_3_gamma + topic_4_gamma , data = train)
-
-cor(basetable)
-
-model_OLS_2 <- lm(cancellations ~ sentiment_dict + sentimentr_2 + 
-                  sentiment_dict_daily_avg + topic_1_dummy + topic_2_dummy +topic_3_dummy + topic_4_dummy +
+model_OLS_1 <- lm(cancellations ~ sentiment_dict + sentimentr + 
+                  sentiment_daily_avg  + topic_2_dummy +topic_3_dummy + topic_4_dummy +
                   topic_1_gamma + topic_2_gamma + topic_3_gamma + topic_4_gamma + 
-                  `timestamp_2020-03-13` + `timestamp_2020-03-14` +
-                  `timestamp_2020-03-15` + `timestamp_2020-03-16` +
-                  `timestamp_2020-03-17` + `timestamp_2020-03-18` +
-                  `timestamp_2020-03-19` + `timestamp_2020-03-20` +
-                  `timestamp_2020-03-21` + `timestamp_2020-03-22` +
-                  `timestamp_2020-03-23` + `timestamp_2020-03-24`, data = train)
+                  sentimentr__wordc, data = train)
+
+model_OLS_2 <- lm(cancellations ~ timestamp_numeric + sentiment_dict + sentimentr + 
+                    sentiment_daily_avg  + topic_2_dummy +topic_3_dummy + topic_4_dummy +
+                    topic_1_gamma + topic_2_gamma + topic_3_gamma + topic_4_gamma + 
+                    sentimentr__wordc, data = train)
 
 summary(model_OLS_1)
 summary(model_OLS_2)
@@ -76,8 +64,14 @@ test$predictions_2 <- predict(model_OLS_2, test)
 
 
 # Some performance measures
-actuals_preds <- test[c('cancellations', 'predictions')]
-min_max_accuracy <- mean(apply(actuals_preds, 1, min) / apply(actuals_preds, 1, max))  
-mape <- mean(abs((actuals_preds$predictions - actuals_preds$cancellations))/actuals_preds$cancellations)  
-# R^2 en mean squared error
+actuals_preds <- test[c('cancellations', 'predictions_1')]
+min_max_accuracy_1 <- mean(apply(actuals_preds, 1, min) / apply(actuals_preds, 1, max))  
+mape_1 <- mean(abs((actuals_preds$predictions - actuals_preds$cancellations))/actuals_preds$cancellations) 
+
+actuals_preds <- test[c('cancellations', 'predictions_2')]
+min_max_accuracy_2 <- mean(apply(actuals_preds, 1, min) / apply(actuals_preds, 1, max))  
+mape_2 <- mean(abs((actuals_preds$predictions - actuals_preds$cancellations))/actuals_preds$cancellations) 
+
+rsquared_1 <- 0.2487 
+rsquared_2 <- 0.8535 
 
