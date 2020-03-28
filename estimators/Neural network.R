@@ -19,9 +19,11 @@ p_load(tidyverse, caret, nnet)
 #import basetable-----------------------------------------------
 basetable <- read.csv('./sources/cleaned/basetable.csv', header=T)
 #Selecting relevant columns and recoding datetime to character for dummy coding later
+
+basetable <- fastDummies::dummy_cols(basetable, 'best_topic')
 basetable <- basetable %>% select(c("sentiment_dict", "sentimentr", 
-                                    "percentage_change","topic_2_dummy",
-                                    "topic_3_dummy","topic_4_dummy","timestamp_numeric", "topic_1_gamma",
+                                    "percentage_change","best_topic_1", 'best_topic_2',
+                                    "best_topic_3","best_topic_4","timestamp_numeric", "topic_1_gamma",
                                     "topic_2_gamma", 'topic_3_gamma','topic_4_gamma' ,"cancellations")) %>% 
   drop_na()
 
@@ -32,9 +34,9 @@ index = sample( seq_len ( nrow ( basetable ) ), size = samplesize )
 
 # Create training and test set
 datatrain = basetable[ index, ]#Training set is used to find the relationship between dependent and independent variables
-datatrain_2 = datatrain[,-7]
+datatrain_2 = datatrain[,-8]
 datatest = basetable[ -index, ] # test set assesses the performance of the model
-datatest_2 = datatest[,-7]
+datatest_2 = datatest[,-8]
 # Implementing neural network ---------------------------------------------
 #using caret we will set the hyperparameters of the neural network: decay and size
 
