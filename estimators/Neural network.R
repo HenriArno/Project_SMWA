@@ -31,9 +31,10 @@ set.seed(80)
 index = sample( seq_len ( nrow ( basetable ) ), size = samplesize )
 
 # Create training and test set
-datatrain = basetable[ index, ] #Training set is used to find the relationship between dependent and independent variables
+datatrain = basetable[ index, ]#Training set is used to find the relationship between dependent and independent variables
+datatrain_2 = datatrain[,-7]
 datatest = basetable[ -index, ] # test set assesses the performance of the model
-
+datatest_2 = datatest[,-7]
 # Implementing neural network ---------------------------------------------
 #using caret we will set the hyperparameters of the neural network: decay and size
 
@@ -42,10 +43,19 @@ mygrid <- expand.grid(.decay=c(0.5, 0.1), .size=c(4,5,6))
 #get max value dependent variable
 max <- max(basetable$cancellations)
 #set neural network
-nnetfit <- train(percentage_change~. -cancellations, data = datatrain, method="nnet", maxit=1000, tuneGrid=mygrid, trace=F) 
-print(nnetfit)
 
-preds <- predict(nnetfit, datatest)
-datatest$predicted <- preds
+nnetfit_1 <- train(percentage_change~. -cancellations, data = datatrain, method="nnet", maxit=1000, tuneGrid=mygrid, trace=F) 
+nnetfit_2 <- train(percentage_change~. -cancellations, data = datatrain_2, method="nnet", maxit=1000, tuneGrid=mygrid, trace=F) 
+
+print(nnetfit_1)
+print(nnetfit_2)
+
+preds_1 <- predict(nnetfit_1, datatest)
+preds_2 <- predict(nnetfit_2, datatest)
+datatest$pred_1 <- preds_1
+datatest$pred_2 <- preds_2
+
 #calculate mape
-MAPE <- mean(abs((datatest$percentage_change-preds)/datatest$percentage_change) * 100)
+MAPE_1 <- mean(abs((datatest$percentage_change-preds_1)/datatest$percentage_change) * 100)
+MAPE_2 <- mean(abs((datatest$percentage_change-preds_2)/datatest$percentage_change) * 100)
+

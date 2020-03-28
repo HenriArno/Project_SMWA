@@ -28,12 +28,13 @@ basetable <- basetable %>% select(c("sentiment_dict", "sentimentr",
 #set label as y and variables as tibble x
 y <- basetable$cancellations
 x <- basetable %>% select(-c("percentage_change", "cancellations"))
-
+x_2 <- basetable %>% select(-c("percentage_change", "cancellations", "timestamp_numeric"))
 
 
 # fit Random Forest -------------------------------------------------------
 
 RF <- randomForest(x,y, importance= T, mtry = 8, ntree = 1000)
+RF_2 <- randomForest(x_2,y, importance= T, mtry = 8, ntree = 1000)
 
 #assess model accuracy
 mean(RF$mse)
@@ -41,3 +42,9 @@ mean(RF$rsq)
 print(RF)
 preds <- RF$predicted
 importance <- RF$importance
+
+mean(RF_2$mse)
+mean(RF_2$rsq)
+print(RF_2)
+preds_2 <- RF_2$predicted
+importance_2 <- RF_2$importance
