@@ -20,7 +20,7 @@ data_clean <- read_csv('./sources/cleaned/dataset_topics_removed.csv')
 
 # Place following line in comment if you want to perform data manipulations on entire dateset 
 # otherwise we only look at the first 200 entries 
-data_clean <- data_clean %>% slice(., 1:200)
+#data_clean <- data_clean %>% slice(., 1:200)
 
 
 # Topic Modeling ----------------------------------------------------------
