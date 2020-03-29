@@ -33,7 +33,7 @@ x_2 <- basetable %>% select(-c("percentage_change", "cancellations", "timestamp_
 
 # fit Random Forest -------------------------------------------------------
 
-RF <- randomForest(x,y, importance= T, mtry = 8, ntree = 100)
+RF <- randomForest(x,y, importance= T, mtry = 2, ntree = 100)
 RF_2 <- randomForest(x_2,y, importance= T, mtry = 2, ntree = 100)
 
 #assess model accuracy
@@ -41,7 +41,7 @@ mean(RF$mse)
 mean(RF$rsq)
 print(RF)
 preds <- RF$predicted
-importance <- RF$importance
+importance <- as.data.frame(RF$importance) %>% arrange()
 
 mean(RF_2$mse)
 mean(RF_2$rsq)
