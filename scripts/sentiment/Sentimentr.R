@@ -1,7 +1,5 @@
-
 # Sentiment Analysis using Sentimentr package -----------------------------
 #In this script we will analyse our cleaned tweets to check for sentiment using the sentiment r package
-
 
 # Setting wd and clearing environmnet -------------------------------------
 
@@ -59,7 +57,6 @@ sentiment2$X <-  sentiment2$element_id
 data <- data%>%rowid_to_column( 'X')
 #join everything in tibble to get a clear result
 result2 <- sentiment2%>%select(-c(element_id, sd))%>% merge(data, by = 'X') %>% select(-X)
-
 
 
 # Write csv file ----------------------------------------------------------

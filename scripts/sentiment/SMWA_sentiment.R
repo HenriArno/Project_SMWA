@@ -106,7 +106,7 @@ plot(1:length(negations),
      type="o",
      ylab="Valence",
      xlab="day",
-     main="Sentiment by day", ☻
+     main="Sentiment by day",
      #ylim=c(-lim,lim))
      ylim=c(-2,2))
 #length(unique(days))
@@ -116,8 +116,6 @@ axis(1,at=1:length(negations),
      labels=unique(substr(created$timestamp,6,10)))
 lines(negations+negations_sd,col="green")
 lines(negations-negations_sd,col="green")
-
-
 
 # Write table -------------------------------------------------------------
 final_table <- dataset

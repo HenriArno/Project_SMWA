@@ -1,5 +1,3 @@
-##########-----Word Embeddings-----##########
-
 #setwd-------------------------------------------------------------------------
 rm(list=ls())
 library(rstudioapi)
@@ -28,7 +26,7 @@ vocab <- create_vocabulary(it)
 #Remove sparse words (=appear less than 3????? times)----------------------------
 vocab <- prune_vocabulary(vocab, term_count_min = 500)   #prune 5 of 3?
 
-vectorizer <- vocab_vectorizer(vocab) #one-hot vector met enkel een 1 voor dat woord. output is vector met zelfde aantal componenten die, voor elk woord in de vocab, de kans geeft dat een willekeurig geselecteerd woord naast dit woord staat?
+vectorizer <- vocab_vectorizer(vocab) #one-hot vector met enkel een 1 voor dat woord
 
 #Use skip gram window of 5 for context words to create co-occurrence matrix-------- predicting surrounding words given a current word
 tcm <- create_tcm(it, vectorizer, skip_grams_window = 5)

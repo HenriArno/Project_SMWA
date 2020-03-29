@@ -9,7 +9,6 @@ p_load(rtweet, httr,tidyverse,wordcloud, tm, topicmodels, tidytext, textclean, f
 
 basetable <- read.csv("./sources/cleaned/basetable.csv")
 
-
 sentiment_data <- basetable %>%
   group_by(timestamp) %>%
   summarise(
