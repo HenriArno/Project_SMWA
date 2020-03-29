@@ -1,10 +1,8 @@
-
 # Random Forest Approach to Sentiment -------------------------------------
 
 # In this script we will firstly make a dataset based on the positive and negative emojis present in our raw
 # data. Next we will train a Random Forest model to identify sentiment and then apply said model to the rest
 # of our data.
-
 
 # Setting wd and clearing environmnet -------------------------------------
 
@@ -40,8 +38,6 @@ text <- data %>% select(text)
 
 #transforming data to data we can work with
 text <- text %>% mutate(text = iconv(text, from = "latin1", to = "ascii", sub = "byte"))
-
-
 
 # constructing emoji dictionary -------------------------------------------
 
@@ -110,8 +106,6 @@ dict_full <- emojis_merged %>% select(sentiment_score, unicode, description.x, r
 dict <- dict_full %>% select(sentiment_score, r_encoding)
 #delete remainders unused variables
 rm(emDict, emDict_raw, emojis, emojis_merged, emojis_raw, description, matchto, skin_tones, url)
-
-
 
 # Construct labeled dataset based on emoji --------------------------------------------------
 
@@ -184,8 +178,6 @@ data <- data %>% drop_na()
 
 #set seed for reproducablitiy
 set.seed(1000) 
-
-
 
 
 # Make our training corpus
@@ -302,8 +294,6 @@ plot(roc(preds,label))
 
 #We can see that although the model will be quite efficient at detecting positive statements, negative statements
 #might pose an issue due to the lower frequency of negative emojis present in our dataset
-
-
 
 prediction2 <- predict(RF, predictor, type="probs")
 write.csv("./sources/predictors/RFclass.csv")
