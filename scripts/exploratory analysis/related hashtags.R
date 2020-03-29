@@ -1,6 +1,3 @@
-################ Wordcloud on dataset #################
-
-
 # loading required packages -----------------------------------------------
 
 # Clean Workspace and setwd

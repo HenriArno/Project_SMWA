@@ -14,14 +14,11 @@ p_load(rtweet, httr,tidyverse,wordcloud, tm, topicmodels, tidytext, textclean, f
 
 data_clean <- read_csv('./sources/cleaned/dataset_topics_removed.csv')
 
-
-
 # Debug Mode --------------------------------------------------------------
 
 # Place following line in comment if you want to perform data manipulations on entire dateset 
 # otherwise we only look at the first 200 entries 
 #data_clean <- data_clean %>% slice(., 1:200)
-
 
 # Topic Modeling ----------------------------------------------------------
 
@@ -67,11 +64,7 @@ for (i in 2:20) {
 # Therefore we use a K of 4
 # The AIC difference between K = 2 and K = 4 is also reasonably small
 
-
-
 # Recap here --------------------------------------------------------------
-
-
 
 #Make final LDA
 #topicmodel <- LDA(x = dtm, k = K + 2, control = list(seed = 1234))

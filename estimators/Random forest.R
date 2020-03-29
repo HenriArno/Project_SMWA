@@ -41,7 +41,8 @@ mean(RF$mse)
 mean(RF$rsq)
 print(RF)
 preds <- RF$predicted
-importance <- as.data.frame(RF$importance) %>% arrange()
+importance <- as.data.frame(RF$importance)
+print(importance[order(importance$IncNodePurity, decreasing = T),] )
 
 mean(RF_2$mse)
 mean(RF_2$rsq)

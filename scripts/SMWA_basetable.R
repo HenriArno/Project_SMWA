@@ -19,10 +19,6 @@ sentiment_sentimentr_data2 <- as_tibble(read.csv("./sources/predictors/sentiment
   select(-c('text', 'user_id', 'timestamp', 'screenname', 'location'))
 dependent_data <- as_tibble(read.csv("./sources/raw/cancellations.csv"))
 
-#RF_sentiment_data <- read.csv("./sources/predictors/RF_sentiment.csv", stringsAsFactors = F)
-
-
-#sentiment_day_data has no user_id !
 
 
 # Create basetable --------------------------------------------------------
@@ -35,12 +31,7 @@ basetable <- full_join(data, topic_data, by="rowid") %>%
   full_join(sentiment_dict_data, by="rowid")%>%
   full_join(sentiment_sentimentr_data2, by="rowid")
 
-
-
-
 rm(data,sentiment_dict_data, sentiment_sentimentr_data1, sentiment_sentimentr_data2, topic_data)
-
-
 
 
 # recode timestamp variable -> we can't convert to POSIXct type due to length
@@ -51,13 +42,10 @@ basetable <- basetable %>% drop_na(timestamp)
 basetable <- basetable[-c(1:1567,168314:168345),]
 
 # add dependent and average sentiment variable
-# hardcoding to get basetable quickly for prediction
-# Will be changed soon
 dependent_data$timestamp <- as.POSIXct(dependent_data$day, format = "%d/%m/%Y")
 dependent_data$day <- NULL
 dependent_data$timestamp <- as.character(dependent_data$timestamp)
 
-# STILL CHECK IF THE DATES CORRECTLY MATCH THE NEGATION VALUES!!!!!
 sentiment_day_data$timestamp <- unique(dependent_data$timestamp)[1:nrow(sentiment_day_data)]
 
 basetable <- basetable %>% 
@@ -79,17 +67,12 @@ basetable$day.y <- NULL
 basetable$negations.y <- NULL
 basetable$rowid <- NULL
 
-
-
-
 relevant_col <- c('text', 'timestamp', 'timestamp_numeric' ,'user_id', 'screenname.x', 'location', 'sentiment',
                   'ave_sentiment', 'negations', 'best_topic', 'best_topic_gamma', 
                   'topic_2_dummy', 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 'topic_2_gamma',
                   'topic_3_gamma', 'topic_4_gamma','word_count', 'cancelled.flights')
 basetable <- basetable[relevant_col]
 rm(relevant_col)
-
-
 colnames(basetable) <- c('text', 'timestamp', 'timestamp_numeric','user_id', 'screenname', 'location', 'sentiment_dict', 'sentimentr',
                          'sentiment_daily_avg','best_topic', 'best_topic_gamma', 
                          'topic_2_dummy', 'topic_3_dummy', 'topic_4_dummy', 'topic_1_gamma', 'topic_2_gamma',
@@ -100,7 +83,7 @@ colnames(basetable) <- c('text', 'timestamp', 'timestamp_numeric','user_id', 'sc
 # This is nothing but a rescaling/shift in the data
 
 # source: (https://www.quora.com/How-many-airplanes-fly-each-day-in-the-world)
-# Note that this is a conervative approximation
+# Note that this is a conservative approximation
 absolute_number_approx <- 170000
 
 # source: (https://www.bts.gov/newsroom/december-2016-airline-on-time-performance)
@@ -109,8 +92,6 @@ percentage_cancelled_approx <- 0.0117
 
 # Create the variable
 basetable$percentage_change <- round((basetable$cancellations / absolute_number_approx) - percentage_cancelled_approx, 4)
-
-
 
 # Write basetable to CSV --------------------------------------------------
 basetable %>% write.csv(., "./sources/cleaned/basetable.csv")

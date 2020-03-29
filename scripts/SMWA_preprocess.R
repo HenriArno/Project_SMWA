@@ -88,9 +88,6 @@ text_clean <- lemmatize_strings(text_clean, dictionary = lemma_dictionary_hs)
 topic_text <- remove_topics(text_clean)
 
 
-
-
-
 # 5. store the cleaned text in the dataset and write to csv
 data$text <- text_clean
 data <- data[!duplicated(data$text),]
@@ -98,8 +95,6 @@ data <- data[!duplicated(data$text),]
 
 #Save clean data
 write_csv(data, './sources/cleaned/dataset_cleaned.csv')
-
-
 
 # 6. store the cleaned and topic-removed text in the dataset and write to csv
 # note that we have altered 'data' in the previous step so we perform some steps again
